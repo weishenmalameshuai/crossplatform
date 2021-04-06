@@ -10,7 +10,7 @@
 			<datatableall :cols="cols" :rows.sync="rows" remote=false></datatableall>
 		</el-main>
 		<el-footer height="45" style="line-height:45px;text-align:center">
-			<el-button size="small" @click="selectKey=null;dshow=true" type="success">导入博文
+			<el-button size="small" @click="toBlogUpload" type="success">导入博文
 			</el-button>
 			<el-button size="small" @click="saveData" type="primary">账号关联</el-button>
 			<el-button size="small" @click="history.go(-1)">返回</el-button>
@@ -80,19 +80,9 @@
 					}
 				});
 			},
-			addPlan: function () {
-				if (!v.selectKey) {
-					sm("请选择一个接口");
-					return;
-				}
-				var result = getJson("getPlanInfo", {id: v.selectKey});
-				if (result && result.success) {
-					v.rows.push(result.plan);
-					v.dshow = false;
-				} else {
-					se(result.msg);
-				}
-			}
+            toBlogUpload:function(){
+                location.href="../blogNews/toUpload";
+            }
 		}
 	});
 </script>

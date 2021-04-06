@@ -1,0 +1,221 @@
+<#include "../layout.html" />
+<@layout>
+<style type="text/css">
+    .el-container, .el-header, .el-aside, .el-main {
+        padding: 0px;
+    }
+
+    .container {
+        padding: 10px;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .el-card {
+        width: 100%;
+        height: 100%;
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .el-card__header {
+        padding: 8px 10px;
+    }
+</style>
+<div id="app">
+    <el-container>
+        <el-header height="105">
+            <div class="container">
+                <el-card>
+                    <div slot="header">
+                        <div style="text-align:left;font-size:15px;"><span
+                                style="border-radius:50%;background-color:#f72a6b;height:20px;width:20px;display:inline-block; color:white;text-align:center">1</span><span
+                                style="padding:10px;">添加文件</span></div>
+                    </div>
+                    <el-form ref="converterForm" label-width="120">
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="上传excel" prop="fileId">
+                                    <el-upload ref="upload" :before-upload="fileTypeHandler" :http-request="uploadFile"
+                                               :auto-upload="false" :limit="1" :multiple="true" :file-list="files"
+                                               :action="action">
+                                        <el-button slot="trigger" :disabled.sync="buttonS" size="small" type="primary">
+                                            请选择文件
+                                        </el-button>
+                                        <el-button size="small" :disabled.sync="buttonS" type="success"
+                                                   @click="submitUpload">上传
+                                        </el-button>
+                                        <el-tag v-show="uploadLogo=='1'">上传中</el-tag>
+                                        <el-tag v-show="uploadLogo=='2'" type="success">上传成功</el-tag>
+                                        <el-tag v-show="uploadLogo=='3'" type="danger">上传失败</el-tag>
+                                    </el-upload>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                </el-card>
+            </div>
+        </el-header>
+        <el-main style="padding-top:10px;box-sizing: border-box;overflow:hidden">
+            <div class="container">
+                <el-card style="height:95%;">
+                    <div slot="header">
+                        <div style="text-align:left;font-size:15px;">
+                            <span style="border-radius:50%;background-color:#f72a6b;height:20px;width:20px;display:inline-block; color:white;text-align:center">2</span><span
+                                style="padding:10px;">文件预览</span>
+                        </div>
+                    </div>
+                    <el-container style="overflow:hidden;height: 80%">
+                        <datatableall :cols="cols" :rows.sync="rows" remote=false></datatableall>
+                    </el-container>
+                </el-card>
+            </div>
+        </el-main>
+        <el-footer height="50">
+            <div class="container">
+                <el-button size="small" @click="saveData" type="primary">保存数据</el-button>
+                <el-button size="small" @click="history.go(-1)">返回</el-button>
+            </div>
+        </el-footer>
+    </el-container>
+</div>
+<script type="text/javascript">
+    var v = new Vue({
+        el: "#app",
+        data: function () {
+            return {
+                filelimit: "xlsx,xls",
+                fileData: new FormData(),
+                fileLength: 0,
+                uploadLogo: 0,
+                buttonS: false,
+                action:'../blogNews/uploadFile',
+                files: [],
+                cols: [{
+                    key: "sourceApp_name",
+                    value: "平台"
+                }, {
+                    key: "user_name",
+                    value: "用户名"
+                }, {
+                    key: "create_time",
+                    value: "发文日期"
+                }, {
+                    key: "content",
+                    value: "博文内容"
+                }],
+                rows: []
+            }
+        },
+        methods: {
+            submitUpload: function () {
+                v.fileData = new FormData();
+                v.$refs.upload.submit();
+                if (v.fileLength == 0) {
+                    return;
+                }
+                v.uploadLogo = "1";
+                var that = v;
+                that.buttonS = true;
+                $.ajax({
+                    type: "post",
+                    url: "../blogNews/uploadFile",
+                    data: that.fileData,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    success: function (data) {
+                        that.buttonS = false;
+                        if (data) {
+                            if (data.code == "200") {
+                                that.rows=data.data.blogList
+                                that.uploadLogo = 2;
+                                that.files = [];
+                                that.fileLength = 0;
+                                that.dShow = false;
+                            } else {
+                                that.uploadLogo = 3;
+                            }
+                        } else {
+                            that.uploadLogo = 3;
+                        }
+                    },
+                    error: function (error) {
+                        that.buttonS = false;
+                        that.uploadLogo = 3;
+                    }
+                });
+            },
+            uploadFile: function (file) {
+                v.fileData.append(file.file.name, file.file);
+                v.fileLength++;
+            },
+            fileTypeHandler: function (file) {
+                if (v.filelimit) {
+                    var fs = v.filelimit.split(",");
+                    var flag = false;
+                    for (var ele in fs) {
+                        if (file.name.endWith("." + fs[ele])) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (!flag) {
+                        se("不是" + v.filelimit + "文件");
+                        return false;
+                    }
+                }
+                return true;
+            },
+            saveData: function () {
+                if (v.converter.fileId != '') {
+                    if (v.rows.length == 0) {
+                        se("必须添加对应关系");
+                        return;
+                    }
+                    var isPrimary = false;
+                    for (var ele in v.rows) {
+                        var item = v.rows[ele];
+                        if (item.primary_key == 1) {
+                            if (isPrimary) {
+                                se("仅允许设置一列为主键");
+                                return;
+                            } else {
+                                isPrimary = true;
+                            }
+                        }
+                    }
+                    if (!isPrimary) {
+                        se("必须设置一列为主键");
+                        return;
+                    }
+                    var result = getJson("saveData", {
+                        template: v.template,
+                        converter: v.converter,
+                        items: v.rows
+                    });
+                    if (result && result.success) {
+                        ss("入库成功！");
+                        v.template = {}
+                        v.converter = {}
+                        v.rows = [];
+                        v.fileName = ''
+                    } else {
+                        se("保存失败,原因:" + result.msg);
+                    }
+                } else {
+                    se("请上传excel文件匹配模板");
+                }
+            },
+            addRelation: function () {
+                if (v.converter.fileId) {
+                    v.dshow = true;
+                    v.ddata = {primary_key: 2}
+                } else {
+                    sm("请上传excel文件");
+                }
+            },
+        }
+    });
+</script>
+</@layout>
