@@ -1,0 +1,133 @@
+<#macro layout>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE10">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta charset="UTF-8">
+<script type="text/javascript" src="/js/vue/bluebird.js"></script>
+<script type="text/javascript" src="/js/vue/vue.prod.js"></script>
+<script type="text/javascript" src="/js/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/js/element/ele.index.js"></script>
+<script type="text/javascript" src="/js/hack.js"></script>
+<script type="text/javascript" src="/js/component/expression.js"></script>
+<script type="text/javascript" src="/js/component/mycomponent.js"></script>
+<script type="text/javascript" src="/js/jquery/intro.min.js"></script>
+<link rel="stylesheet" href="/css/element/ele.index.css" />
+<link rel="stylesheet" href="/css/main.css" />
+<style type="text/css">
+	.el-container,.el-aside{
+		height:100%;
+		margin:0;
+		padding:0;
+	}
+	.el-form{
+		margin-bottom:0px;
+	}
+	.el-upload-list__item-name [class^=el-icon] {
+		height:auto;
+	}
+	.red td{
+		background-color:#ff9797 !important
+	}
+	.green td{
+		background-color:#79ff79 !important
+	}
+	.yellow td{
+		background-color:#d9d919 !important
+	}
+/* 右键菜单  */
+	.right-menu {
+		position:fixed;
+		left:300px;
+		top:500px;
+		background:#fff;
+		z-index:999;
+		border:1px solid #eee;
+		box-shadow:0 .5em 1em 0 rgba(0,0,0,.1);
+		border-radius:1px;
+	}
+	.right-menu a {
+		width:auto;
+		height:28px;
+		min-width:100px;
+		line-height:24px;
+		text-align:right;
+		display:block;
+		padding:2px 15px;
+	}
+
+</style>
+<script type="text/javascript">
+function sendJson(url,data){
+	var str1;
+	jQuery.ajax({
+		async:false,
+		data:JSON.stringify(data),
+		url:url,
+		dataType:"text",
+        contentType:"application/json",
+		type:"post",
+		success:function(str){
+			str1=str;
+		}
+	});
+	if(typeof str1==="string"){
+		return str1;
+	}else{
+		return eval('('+str1+')');
+	}
+}
+function getJson(url,data,forceFlag){
+	var obj;
+	jQuery.ajax({
+		async:false,
+		data:(function(){
+			if(data){
+				return JSON.stringify(data);
+			}else{
+				return "{}";
+			}
+		})(),
+		url:url,
+		dataType:"json",
+        contentType:"application/json",
+		type:"post",
+		success:function(resultObj){
+			if(resultObj&&resultObj.code=="200"){
+				if(forceFlag){
+					obj=resultObj;
+				}else{
+					obj=resultObj.data;
+				}
+			}else{
+				if(forceFlag){
+					obj=resultObj;
+				}else{
+					se("错误码:"+resultObj.code+",错误信息:"+resultObj.msg);
+					obj=null;
+				}
+			}
+		},
+        error:function(errorData){
+        	if(errorData.status!=200){
+			    se('后端服务出错，请联系管理员')
+				console.log(arguments);
+        	}
+		}
+	});
+	return obj;
+}
+function copyObj(obj){
+	var result={};
+	for(var ele in obj){
+		result[ele]=obj[ele];
+	}
+	return result;
+}
+</script>
+</head>
+<body style="width:100%;height:100%;overflow:hidden">
+    <#nested>
+</body>
+</html>
+</#macro>

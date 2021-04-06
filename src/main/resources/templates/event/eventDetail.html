@@ -1,0 +1,99 @@
+<#include "../layout.html">
+<@layout>
+<div id="app">
+	<el-container>
+		<el-header height="80" style="padding:15px;">
+			<el-button size="medium" type="info">导入数据</el-button>
+			<el-button size="medium" type="info">导出数据格式</el-button>
+		</el-header>
+		<el-main>
+			<datatableall :cols="cols" :rows.sync="rows" remote=false></datatableall>
+		</el-main>
+		<el-footer height="45" style="line-height:45px;text-align:center">
+			<el-button size="small" @click="selectKey=null;dshow=true" type="success">导入博文
+			</el-button>
+			<el-button size="small" @click="saveData" type="primary">账号关联</el-button>
+			<el-button size="small" @click="history.go(-1)">返回</el-button>
+		</el-footer>
+	</el-container>
+</div>
+<script type="text/javascript">
+	var baseData =getJson("getBaseData");
+	var v = new Vue({
+		el: "#app",
+		data: function () {
+			return {
+				cols: [{
+					key: "sourceApp_name",
+					value: "平台"
+				}, {
+					key: "user_name",
+					value: "用户名"
+				}, {
+					key: "description",
+					value: "个人描述"
+				}, {
+					key: "blog_num",
+					value: "博文数量"
+				}, {
+					width:150,
+					value:"操作",
+					type:"button",
+					buttons:[{
+						value:"编辑",
+						handler:function(idx,row){
+							location.href="toUserDetail?id="+row.user_id;
+						}
+					},{
+						value:"删除",
+						type:"danger",
+						handler:function(idx,row){
+							sc(function (vv) {
+								if (vv) {
+
+								}
+							});
+						}
+					}]
+				}],
+				rows: baseData.event_info || []
+			}
+		},
+		methods: {
+			saveData: function () {
+				v.$refs.df.validate().then(function () {
+					if (v.rows.length > 0) {
+						var result = getJson("saveData", {
+							mainData: v.dfdata,
+							planList: v.rows
+						});
+						if (result && result.success) {
+							ss("保存成功，5秒后返回！接口分组api_id:" + result.api_id + ",api_key:" + result.api_key);
+							setTimeout(function () {
+								history.go(-1);
+							}, 5000)
+						} else {
+							se(result.msg);
+						}
+					} else {
+						se("没有接口");
+					}
+				});
+			},
+			addPlan: function () {
+				if (!v.selectKey) {
+					sm("请选择一个接口");
+					return;
+				}
+				var result = getJson("getPlanInfo", {id: v.selectKey});
+				if (result && result.success) {
+					v.rows.push(result.plan);
+					v.dshow = false;
+				} else {
+					se(result.msg);
+				}
+			}
+		}
+	});
+</script>
+</@layout>

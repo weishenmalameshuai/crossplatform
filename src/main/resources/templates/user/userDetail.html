@@ -1,0 +1,141 @@
+<#include "../layout.html">
+<@layout>
+
+<style type="text/css">
+    .avatar-uploader .el-upload {
+        border: 1px dashed #d9d9d9;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .avatar-uploader .el-upload:hover {
+        border-color: #409EFF;
+    }
+
+    .avatar-uploader-icon {
+        font-size: 28px;
+        color: #8c939d;
+        width: 123px;
+        height: 123px;
+        line-height: 123px;
+        text-align: center;
+    }
+
+    .avatar {
+        width: 123px;
+        height: 123px;
+        display: block;
+    }
+</style>
+<div id="app">
+    <el-container>
+        <el-header height="100" style="padding:15px;">
+            <el-form ref="userform" :model="user" label-width="120" :rules="rules">
+                <el-row>
+                    <el-col :span="12">
+                        <el-row>
+                            <el-col>
+                                <el-form-item label="用户名" prop="user_name">
+                                    <el-input size="mini" v-model="user.user_name"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="24">
+                                <el-form-item label="个人描述" prop="description">
+                                    <el-input size="mini" v-model="user.description" type="textarea"
+                                              :rows="2"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="用户头像" prop="photo_loc">
+                            <el-upload
+                                    class="avatar-uploader"
+                                    action="https://jsonplaceholder.typicode.com/posts/"
+                                    :show-file-list="false"
+                                    :on-success="handleAvatarSuccess"
+                                    :before-upload="beforeAvatarUpload">
+                                <img v-if="user.photo_loc" :src="user.photo_loc" class="avatar">
+                                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                            </el-upload>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </el-form>
+        </el-header>
+        <el-main>
+            <h2 style="padding: 5px ">用户博文</h2>
+            <datatableall :cols="cols" :rows.sync="rows" remote=false style="height: 90%"></datatableall>
+        </el-main>
+        <el-footer height="45" style="line-height:45px;text-align:center">
+            <el-button size="small" @click="saveData" type="primary">保存</el-button>
+            <el-button size="small" @click="history.go(-1)">返回</el-button>
+        </el-footer>
+    </el-container>
+</div>
+<script type="text/javascript">
+    var baseData = getJson("../user/getBaseData");
+    var v = new Vue({
+        el: "#app",
+        data: function () {
+            return {
+                user: baseData.user || {},
+                rules: {
+                    user_name: _sv("r"),
+                    description: _sv("r"),
+                    photo_loc: _sv("r"),
+                },
+                cols: [{
+                    key: "create_time",
+                    value: "发文日期"
+                }, {
+                    key: "content",
+                    value: "博文内容"
+                }],
+                rows: baseData.blogList || []
+            }
+        },
+        methods: {
+            handleAvatarSuccess: function (res, file) {
+                v.user.photo_loc = URL.createObjectURL(file.raw);
+            },
+            beforeAvatarUpload: function (file) {
+                let isJPG = file.type === 'image/jpeg';
+                // let isLt2M = file.size / 1024 / 1024 < 2;
+
+                if (!isJPG) {
+                    this.$message.error('上传头像图片只能是 JPG 格式!');
+                }
+                // if (!isLt2M) {
+                //     this.$message.error('上传头像图片大小不能超过 2MB!');
+                // }
+                return isJPG ;
+            },
+            saveData: function () {
+                v.$refs.df.validate().then(function () {
+                    if (v.rows.length > 0) {
+                        var result = getJson("saveData", {
+                            mainData: v.dfdata,
+                            planList: v.rows
+                        });
+                        if (result && result.success) {
+                            ss("保存成功，5秒后返回！接口分组api_id:" + result.api_id + ",api_key:" + result.api_key);
+                            setTimeout(function () {
+                                history.go(-1);
+                            }, 5000)
+                        } else {
+                            se(result.msg);
+                        }
+                    } else {
+                        se("没有接口");
+                    }
+                });
+            },
+        }
+    });
+</script>
+</@layout>

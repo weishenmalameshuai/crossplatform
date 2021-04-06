@@ -2,13 +2,17 @@ package com.demo.crossplatform.controller;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.alibaba.fastjson.JSONObject;
 import com.demo.crossplatform.commonutils.ReponseCode;
-import com.demo.crossplatform.entity.BlogNews;
 import com.demo.crossplatform.entity.Event;
 import com.demo.crossplatform.service.EventService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +31,55 @@ public class EventController {
 
     @Resource
     private EventService eventService;
+
+    @RequestMapping("toPage")
+    public Object toPage(){
+        return new ModelAndView("event/eventPage");
+    }
+
+    @RequestMapping("toUserDetail")
+    public Object toUserDetail(@RequestParam(defaultValue = "", name = "id") String id,
+                           HttpSession session){
+        if (!"".equals(id)) {
+            session.setAttribute("user_id", id);
+        }
+        return new ModelAndView("user/userDetail");
+    }
+
+    @RequestMapping("toDetail")
+    public Object toDetail(@RequestParam(defaultValue = "", name = "id") String id,
+                           HttpSession session){
+        if (!"".equals(id)) {
+            session.setAttribute("event_id", id);
+        }
+        return new ModelAndView("event/eventDetail");
+    }
+
+    @RequestMapping("getData")
+    public Object getData(@RequestBody Map<String, Object> data) {
+        //输出data查看分页 参数
+        List<Map<String,Object>> resultList=new ArrayList<>();
+        resultList.add(JSONObject.parseObject("{id:\"1\",event_name:\"事件1\",addtime:\"2021-4-6\"}"));
+        resultList.add(JSONObject.parseObject("{id:\"2\",event_name:\"事件2\",addtime:\"2021-4-6\"}"));
+        resultList.add(JSONObject.parseObject("{id:\"3\",event_name:\"事件3\",addtime:\"2021-4-6\"}"));
+        resultList.add(JSONObject.parseObject("{id:\"4\",event_name:\"事件4\",addtime:\"2021-4-6\"}"));
+        Map<String,Object> resultMap=new HashMap<>();
+        resultMap.put("rows",resultList);
+        resultMap.put("total",resultList.size());
+        resultMap.put("pageNum",0);
+        resultMap.put("pageSize",0);
+        return ReponseCode.ok().data(resultMap);
+    }
+
+    @RequestMapping("getBaseData")
+    public Object getBaseData() {
+        List<Map<String,Object>> resultList=new ArrayList<>();
+        resultList.add(JSONObject.parseObject("{id:\"1\",user_id:\"1\",sourceApp_name:\"pingtai1\",user_name:\"张三\",description:\"张三的描述\",blog_num:\"20\"}"));
+        resultList.add(JSONObject.parseObject("{id:\"2\",user_id:\"1\",sourceApp_name:\"pingtai2\",user_name:\"里斯\",description:\"里斯的描述\",blog_num:\"24\"}"));
+        resultList.add(JSONObject.parseObject("{id:\"3\",user_id:\"1\",sourceApp_name:\"pingtai3\",user_name:\"撒旦\",description:\"撒旦的描述\",blog_num:\"11\"}"));
+        resultList.add(JSONObject.parseObject("{id:\"4\",user_id:\"1\",sourceApp_name:\"pingtai4\",user_name:\"迪迦\",description:\"迪迦的描述\",blog_num:\"4255\"}"));
+        return ReponseCode.ok().data("event_info",resultList);
+    }
 
     //查询(列表数据)
     @GetMapping("search/{current}/{limit}")
