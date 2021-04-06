@@ -20,8 +20,8 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class SourceApp implements Serializable {
 
-    private static final long serialVersionUID = 1L;
 
+    private static final long serialVersionUID = 1073592466191996196L;
     /**
      * 平台主键ID
      */

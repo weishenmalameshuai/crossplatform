@@ -1,13 +1,17 @@
 package com.demo.crossplatform.controller;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.demo.crossplatform.commonutils.ReponseCode;
+import com.demo.crossplatform.entity.BlogNews;
 import com.demo.crossplatform.entity.Event;
 import com.demo.crossplatform.service.EventService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -25,10 +29,31 @@ public class EventController {
     private EventService eventService;
 
     //查询(列表数据)
-    @GetMapping("search")
-    public ReponseCode doSearch() {
-        List<Event> events = eventService.list(null);
-        return ReponseCode.ok().data("events", events);
+    @GetMapping("search/{current}/{limit}")
+    public ReponseCode doSearch(@PathVariable long current,
+                                @PathVariable long limit) {
+
+        Page<Event> eventPage = new Page<>(current, limit);
+        eventService.page(eventPage, null);
+
+        Map<String, Object> pageMap = new HashMap();
+
+        //总记录数
+        pageMap.put("total", eventPage.getTotal());
+        //每页显示记录数
+        pageMap.put("size", eventPage.getSize());
+        //当前页
+        pageMap.put("current", eventPage.getCurrent());
+        //总页数
+        pageMap.put("pages", eventPage.getPages());
+        //是否有上一页
+        pageMap.put("hasprevious", eventPage.hasPrevious());
+        //是否有下一页
+        pageMap.put("hasnext", eventPage.hasNext());
+        //记录数
+        pageMap.put("events", eventPage.getRecords());
+
+        return ReponseCode.ok().data("events", pageMap);
     }
 
     //查询(单条数据)

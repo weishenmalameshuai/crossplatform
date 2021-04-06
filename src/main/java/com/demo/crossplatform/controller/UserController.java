@@ -1,14 +1,15 @@
 package com.demo.crossplatform.controller;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.demo.crossplatform.commonutils.ReponseCode;
-import com.demo.crossplatform.entity.BlogNews;
 import com.demo.crossplatform.entity.User;
 import com.demo.crossplatform.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -26,10 +27,31 @@ public class UserController {
     private UserService userService;
 
     //查询(列表数据)
-    @GetMapping("search")
-    public ReponseCode doSearch() {
-        List<User> users = userService.list(null);
-        return ReponseCode.ok().data("users", users);
+    @GetMapping("search/{current}/{limit}")
+    public ReponseCode doSearch(@PathVariable long current,
+                                @PathVariable long limit) {
+
+        Page<User> userPage = new Page<>(current, limit);
+        userService.page(userPage, null);
+
+        Map<String, Object> pageMap = new HashMap();
+
+        //总记录数
+        pageMap.put("total", userPage.getTotal());
+        //每页显示记录数
+        pageMap.put("size", userPage.getSize());
+        //当前页
+        pageMap.put("current", userPage.getCurrent());
+        //总页数
+        pageMap.put("pages", userPage.getPages());
+        //是否有上一页
+        pageMap.put("hasprevious", userPage.hasPrevious());
+        //是否有下一页
+        pageMap.put("hasnext", userPage.hasNext());
+        //记录数
+        pageMap.put("users", userPage.getRecords());
+
+        return ReponseCode.ok().data("users", pageMap);
     }
 
     //查询(单条数据)

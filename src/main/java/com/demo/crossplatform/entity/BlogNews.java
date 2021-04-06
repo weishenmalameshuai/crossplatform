@@ -21,8 +21,8 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class BlogNews implements Serializable {
 
-    private static final long serialVersionUID = 1L;
 
+    private static final long serialVersionUID = 3041528375275559307L;
     /**
      * 博文主键ID
      */
