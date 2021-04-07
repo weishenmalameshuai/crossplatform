@@ -7,12 +7,12 @@
 			<el-button size="medium" type="info">导出数据格式</el-button>
 		</el-header>
 		<el-main>
-			<datatableall :cols="cols" :rows.sync="rows" remote=false></datatableall>
+			<datatableall ref="dt" :cols="cols" :rows.sync="rows" remote=false></datatableall>
 		</el-main>
 		<el-footer height="45" style="line-height:45px;text-align:center">
 			<el-button size="small" @click="toBlogUpload" type="success">导入博文
 			</el-button>
-			<el-button size="small" @click="saveData" type="primary">账号关联</el-button>
+			<el-button size="small" @click="userAssociation" type="primary">账号关联</el-button>
 			<el-button size="small" @click="history.go(-1)">返回</el-button>
 		</el-footer>
 	</el-container>
@@ -60,25 +60,13 @@
 			}
 		},
 		methods: {
-			saveData: function () {
-				v.$refs.df.validate().then(function () {
-					if (v.rows.length > 0) {
-						var result = getJson("saveData", {
-							mainData: v.dfdata,
-							planList: v.rows
-						});
-						if (result && result.success) {
-							ss("保存成功，5秒后返回！接口分组api_id:" + result.api_id + ",api_key:" + result.api_key);
-							setTimeout(function () {
-								history.go(-1);
-							}, 5000)
-						} else {
-							se(result.msg);
-						}
-					} else {
-						se("没有接口");
-					}
-				});
+            userAssociation: function () {
+                let user=v.$refs.dt.getCurrent()
+                if(user){
+                    location.href="../user/toUserAssociation";
+                }else{
+                    sm();
+                }
 			},
             toBlogUpload:function(){
                 location.href="../blogNews/toUpload";

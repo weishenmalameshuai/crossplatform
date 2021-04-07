@@ -1,0 +1,258 @@
+<#include "../layout.html" />
+<@layout>
+<style type="text/css">
+    .el-container, .el-header, .el-aside, .el-main {
+        padding: 0px;
+    }
+
+    .container {
+        padding: 10px;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .el-card {
+        width: 100%;
+        height: 100%;
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .el-card__header {
+        padding: 8px 10px;
+    }
+</style>
+<div id="app">
+    <el-form ref="form" :model="dataInfo" label-width="120">
+        <el-container>
+            <el-header height="140">
+                <div class="container">
+                    <el-card>
+                        <div slot="header">
+                            <div style="text-align:left;font-size:15px;"><span
+                                    style="border-radius:50%;background-color:#f72a6b;height:20px;width:20px;display:inline-block; color:white;text-align:center">1</span><span
+                                    style="padding:10px;">识别基础信息</span></div>
+                        </div>
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="事件名称" prop="even_name">
+                                    <el-input size="mini" v-model="dataInfo.even_name" readonly="true"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-card>
+                </div>
+            </el-header>
+            <el-main style="padding-top:10px;box-sizing: border-box;overflow:hidden">
+                <div class="container">
+                    <el-card style="height:95%;">
+                        <div slot="header">
+                            <div style="text-align:left;font-size:15px;">
+                                <span style="border-radius:50%;background-color:#f72a6b;height:20px;width:20px;display:inline-block; color:white;text-align:center">2</span><span
+                                    style="padding:10px;">匹配用户信息</span>
+                                <el-button size="mini" @click="startAss" type="success">开始匹配</el-button>
+                                <el-button size="mini" type="success">导出数据</el-button>
+                            </div>
+                        </div>
+                        <el-container style="overflow:hidden">
+                            <el-aside width="530" style="padding:5px 0px;box-sizing: border-box;overflow:hidden;margin-right: 110px;">
+                                <el-row>
+                                    <el-col :span="24">
+                                        <el-form-item label="主账号主账号" prop="user_name">
+                                            <el-input size="mini" v-model="dataInfo.user_name" readonly="true"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="24">
+                                        <el-form-item label="识别范围" prop="radio">
+                                            <el-radio-group v-model="radio">
+                                                <el-radio :label="1">已关联账号</el-radio>
+                                                <el-radio :label="2">所有账号</el-radio>
+                                            </el-radio-group>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="24">
+                                        <el-form-item label="匹配进程">
+                                            <el-progress :text-inside="true" :stroke-width="26"
+                                                         :percentage="percentage"></el-progress>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="24">
+                                        <el-form-item label="最相似作者" prop="like_author">
+                                            <el-input size="mini" v-model="dataInfo.like_author"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="12">
+                                        <el-form-item label="平台" prop="like_app">
+                                            <el-input size="mini" v-model="dataInfo.like_app"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="12">
+                                        <el-form-item label="匹配次数" prop="like_time">
+                                            <el-input size="mini" v-model="dataInfo.like_time"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                            </el-aside>
+                            <el-main style="padding:5px 0px 5px 5px;box-sizing: border-box;overflow:hidden;">
+                                <el-container style="overflow:hidden">
+                                    <el-header height=25>
+                                        <div style="width:100%;text-align:left;font-size:15px;">匹配结果</div>
+                                    </el-header>
+                                    <el-main style="overflow:hidden">
+                                        <div id="myGrid" style="height: 240px;width:500px;"
+                                             class="ag-theme-alpine"></div>
+                                    </el-main>
+                                </el-container>
+                            </el-main>
+                        </el-container>
+                    </el-card>
+                </div>
+            </el-main>
+            <el-footer height="50">
+                <div class="container">
+                    <el-button size="small" type="primary">作者身份匹配</el-button>
+                    <el-button size="small" @click="history.go(-1)">返回</el-button>
+                </div>
+            </el-footer>
+        </el-container>
+    </el-form>
+</div>
+<script type="text/javascript">
+    //定义表格列
+    var columnDefs = [
+        {headerName: '平台', field: 'sourceApp_name'},
+        {headerName: '用户名', field: 'user_name'},
+        {headerName: '匹配度', field: 'likes'},
+    ];
+
+    var data = [];
+
+    //将列和数据赋给gridOptions
+    var gridOptions = {
+        i18n: 'zh-cn', //中文
+        columnDefs: columnDefs,  //设置列名
+        rowData: data,  //设置数据
+        onGridReady: function () {
+            //表格创建完成后执行的事件
+            gridOptions.api.sizeColumnsToFit();//调整表格大小自适应
+        },
+        defaultColDef: {
+            editable: true,//单元表格是否可编辑
+            enableRowGroup: true,
+            enablePivot: true,
+            enableValue: true,
+            sortable: true, //开启排序
+            resizable: true,//是否可以调整列大小，就是拖动改变列大小
+            filter: true  //开启刷选
+        },
+        pagination: false,  //开启分页（前端分页）
+        paginationAutoPageSize: true, //根据网页高度自动分页（前端分页）
+    };
+
+    //在dom加载完成后 初始化agGrid完成
+    document.addEventListener("DOMContentLoaded", function () {
+        var eGridDiv = document.querySelector('#myGrid');  //myGrid 是容器div的ID
+        new agGrid.Grid(eGridDiv, gridOptions);
+    });
+
+    var baseData = getJson("../user/getDataInfo");
+    var v = new Vue({
+        el: "#app",
+        data: function () {
+            return {
+                cols: [{
+                    key: "sourceApp_name",
+                    value: "平台"
+                }, {
+                    key: "user_name",
+                    value: "用户名"
+                }, {
+                    key: "likes",
+                    value: "匹配度"
+                }],
+                coltableheight: 240,
+                coldata: [],
+                dataInfo: baseData.dataInfo || {},
+                percentage: 100,
+                radio: 1,
+            }
+        },
+        methods: {
+            startAss: function () {
+                v.percentage = 0
+                var int = setInterval(function () {
+                    v.percentage++
+                    if (v.percentage == 100) {
+                        data = [
+                            {sourceApp_name: "weibo", user_name: "一直独立孤行的侠", likes: "0.89"},
+                            {sourceApp_name: "weibo", user_name: "一只想飞的狸花猫", likes: "0.72"},
+                            {sourceApp_name: "weibo", user_name: "神一样的甜甜猫", likes: "0.71"},
+                            {sourceApp_name: "weibo", user_name: "写一封信", likes: "0.59"},
+                            {sourceApp_name: "weibo", user_name: "X_小虎牙_T", likes: "0.51"},
+                        ]
+                        clearInterval(int)
+                    }
+                }, 100)
+            },
+            selectEven: function (val) {
+                if (val) {
+                    var result = getJson("getTableInfo", {name: val});
+                    if (result && result.success) {
+                        v.coldata = [];
+                        v.sdata = [];
+                    }
+                }
+            },
+            saveData: function () {
+                v.$refs.planform.validate().then(function () {
+                    if (v.coldata.length == 0) {
+                        se("必须录入转换信息");
+                        return;
+                    }
+                    var isPrimary = false;
+                    for (var ele in v.coldata) {
+                        var item = v.coldata[ele];
+                        if (item.primary_key == 1) {
+                            if (isPrimary) {
+                                se("仅允许设置一列为主键");
+                                return;
+                            } else {
+                                isPrimary = true;
+                            }
+                        }
+                    }
+                    if (!isPrimary) {
+                        se("必须设置一列为主键");
+                        return;
+                    }
+                    var result = getJson("saveData", {
+                        plan: v.plan,
+                        items: v.coldata,
+                        static_items: v.srow
+                    });
+                    if (result && result.success) {
+                        ss("保存成功，5秒后返回,接口的api_id:" + result.api_id + ",api_key:" + result.api_key);
+                        setTimeout(function () {
+                            history.go(-1);
+                        }, 5000);
+                    } else {
+                        if (result && !result.testResult) {
+                            v.errorshow = true;
+                            v.errormsg = result.msg;
+                        }
+                        se("保存失败");
+                    }
+                });
+            }
+        }
+    });
+</script>
+</@layout>
