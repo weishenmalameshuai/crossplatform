@@ -56,20 +56,21 @@
 						}
 					}]
 				}],
-				rows: baseData.event_info || []
+				rows: baseData.event_info || [],
+				event_id:baseData.event_id || ''
 			}
 		},
 		methods: {
             userAssociation: function () {
-                let user=v.$refs.dt.getCurrent()
-                if(user){
-                    location.href="../user/toUserAssociation";
+                let event=v.$refs.dt.getCurrent()
+                if(event){
+                    location.href="../user/toUserAssociation?event_id="+v.event_id;
                 }else{
                     sm();
                 }
 			},
             toBlogUpload:function(){
-                location.href="../blogNews/toUpload";
+                location.href="../blogNews/toUpload?event_id="+v.event_id;
             }
 		}
 	});

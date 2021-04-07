@@ -33,7 +33,7 @@
 								if(cur){
 									v.data.ddf.title="修改指标";
 									v.data.ddf.show=true;
-									var result=getJson("select/1",{id:cur.dataset_id});
+									var result=getJson("select/"+cur.id);
 									v.data.ddf.data=result.event;
 								}else{
 									sm();

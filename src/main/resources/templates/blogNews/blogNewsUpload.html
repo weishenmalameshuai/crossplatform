@@ -55,22 +55,6 @@
                                                 @click="submitUpload">上传到服务器</el-button>
                                     </el-upload>
                                 </el-form-item>
-                                <!--<el-form-item label="上传excel" prop="fileId">
-                                    <el-upload ref="upload" :before-upload="fileTypeHandler" :http-request="uploadFile"
-                                               :auto-upload="false" :limit="1" :multiple="true" :file-list="files"
-                                               name="file"
-                                               :action="action">
-                                        <el-button slot="trigger" :disabled.sync="buttonS" size="small" type="primary">
-                                            请选择文件
-                                        </el-button>
-                                        <el-button size="small" :disabled.sync="buttonS" type="success"
-                                                   @click="submitUpload">上传
-                                        </el-button>
-                                        <el-tag v-show="uploadLogo=='1'">上传中</el-tag>
-                                        <el-tag v-show="uploadLogo=='2'" type="success">上传成功</el-tag>
-                                        <el-tag v-show="uploadLogo=='3'" type="danger">上传失败</el-tag>
-                                    </el-upload>
-                                </el-form-item>-->
                             </el-col>
                         </el-row>
                     </el-form>
@@ -101,10 +85,12 @@
     </el-container>
 </div>
 <script type="text/javascript">
+    var baseData=getJson("getBaseData")
     var v = new Vue({
         el: "#app",
         data: function () {
             return {
+                event_id:baseData.event_id||'',
                 filelimit: "xlsx,xls",
                 fileData: new FormData(),
                 fileLength: 0,
@@ -216,56 +202,12 @@
                 }
                 return true;
             },
-            saveData: function () {
-                if (v.converter.fileId != '') {
-                    if (v.rows.length == 0) {
-                        se("必须添加对应关系");
-                        return;
-                    }
-                    var isPrimary = false;
-                    for (var ele in v.rows) {
-                        var item = v.rows[ele];
-                        if (item.primary_key == 1) {
-                            if (isPrimary) {
-                                se("仅允许设置一列为主键");
-                                return;
-                            } else {
-                                isPrimary = true;
-                            }
-                        }
-                    }
-                    if (!isPrimary) {
-                        se("必须设置一列为主键");
-                        return;
-                    }
-                    var result = getJson("saveData", {
-                        template: v.template,
-                        converter: v.converter,
-                        items: v.rows
-                    });
-                    if (result && result.success) {
-                        ss("入库成功！");
-                        v.template = {}
-                        v.converter = {}
-                        v.rows = [];
-                        v.fileName = ''
-                    } else {
-                        se("保存失败,原因:" + result.msg);
-                    }
-                } else {
-                    se("请上传excel文件匹配模板");
-                }
-            },
-            addRelation: function () {
-                if (v.converter.fileId) {
-                    v.dshow = true;
-                    v.ddata = {primary_key: 2}
-                } else {
-                    sm("请上传excel文件");
-                }
-            },
             addData: function () {
-
+                var result=getJson("batchAddBlogNews",{rows:this.rows,event_id:this.event_id});
+                if(result){
+                    this.rows = []
+                    ss()
+                }
             }
         }
     });

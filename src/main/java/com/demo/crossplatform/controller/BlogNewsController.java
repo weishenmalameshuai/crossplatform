@@ -48,8 +48,16 @@ public class BlogNewsController {
     private SourceAppService sourceAppService;
 
     @RequestMapping("toUpload")
-    public Object toUpload(){
+    public Object toUpload(@RequestParam(defaultValue = "",name = "event_id")String event_id, HttpSession session){
+        session.setAttribute("blogUpload_event_id",event_id);
         return new ModelAndView("blogNews/blogNewsUpload");
+    }
+
+    @RequestMapping("getBaseData")
+    public Object getBaseData(HttpSession session){
+        Map<String,Object> result=new HashMap<>();
+        result.put("event_id",session.getAttribute("blogUpload_event_id"));
+        return ReponseCode.ok().data(result);
     }
 
     @RequestMapping("uploadFile")
@@ -61,10 +69,18 @@ public class BlogNewsController {
     }
 
     @RequestMapping("batchAddBlogNews")
-    public Object batchAddBlogNews(@RequestBody Map<String, Object> data,
-                                   HttpSession session) throws ParseException {
-
-        List<BlogNewsExcel> blogNewsExcels = (List<BlogNewsExcel>) data.get("rows");
+    public Object batchAddBlogNews(@RequestBody Map<String, Object> data) throws ParseException {
+        List<Map<String,Object>> datalist= (List<Map<String, Object>>) data.get("rows");
+        Object event_id=data.get("event_id");
+        List<BlogNewsExcel> blogNewsExcels = new ArrayList<>();
+        for (Map<String,Object> item:datalist){
+            BlogNewsExcel blogNewsExcel=new BlogNewsExcel();
+            blogNewsExcel.setUser_name(item.get("user_name")+"");
+            blogNewsExcel.setSource_app_name(item.get("source_app_name")+"");
+            blogNewsExcel.setLssue_date(item.get("lssue_date")+"");
+            blogNewsExcel.setContent(item.get("content")+"");
+            blogNewsExcels.add(blogNewsExcel);
+        }
 
         //构建条件
         QueryWrapper<SourceApp> sourceAppQueryWrapper;
@@ -84,7 +100,7 @@ public class BlogNewsController {
             }
 
             userQueryWrapper = new QueryWrapper();
-            userQueryWrapper.eq("userName", excel.getUser_name());
+            userQueryWrapper.eq("user_name ", excel.getUser_name());
             User user = userService.getOne(userQueryWrapper);
 
             if (user == null) {
@@ -96,10 +112,15 @@ public class BlogNewsController {
             BlogNews blogNews = new BlogNews();
             blogNews.setSrcAppId(sourceApp.getId());
             blogNews.setUserId(user.getId());
-            blogNews.setEventId((Integer) session.getAttribute("event_id"));
+            blogNews.setEventId(Integer.parseInt(event_id.toString()) );
             blogNews.setContent(excel.getContent());
-            blogNews.setCreateTime(new SimpleDateFormat("yyyy-MM-dd")
-                    .parse(excel.getLssue_date()));
+            try {
+                blogNews.setCreateTime(new SimpleDateFormat("yyyy-MM-dd")
+                        .parse(excel.getLssue_date()));
+            }catch (Exception e){
+                blogNews.setCreateTime(null);
+            }
+
 
             blogNewsService.save(blogNews);
         }

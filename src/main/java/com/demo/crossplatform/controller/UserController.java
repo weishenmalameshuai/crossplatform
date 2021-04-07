@@ -2,21 +2,23 @@ package com.demo.crossplatform.controller;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.demo.crossplatform.commonutils.ReponseCode;
+import com.demo.crossplatform.entity.BlogNews;
+import com.demo.crossplatform.entity.Event;
+import com.demo.crossplatform.entity.SourceApp;
 import com.demo.crossplatform.entity.User;
+import com.demo.crossplatform.service.BlogNewsService;
+import com.demo.crossplatform.service.EventService;
+import com.demo.crossplatform.service.SourceAppService;
 import com.demo.crossplatform.service.UserService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>
@@ -32,6 +34,12 @@ public class UserController {
 
     @Resource
     private UserService userService;
+    @Resource
+    private EventService eventService;
+    @Resource
+    private SourceAppService sourceAppService;
+    @Resource
+    private BlogNewsService blogNewsService;
 
     @RequestMapping("toDetail")
     public Object toDetail(@RequestParam(defaultValue = "", name = "id") String id,
@@ -43,79 +51,90 @@ public class UserController {
     }
 
     @RequestMapping("toUserAssociation")
-    public Object toUserAssociation() {
+    public Object toUserAssociation(@RequestParam(defaultValue = "", name = "even_id") String even_id, HttpSession session) {
+        session.setAttribute("UA_even_id", even_id);
         return new ModelAndView("user/userAssociation");
     }
 
     @RequestMapping("toUserMatching")
-    public Object toUserMatching(@RequestParam(defaultValue = "", name = "even_name") String even_name, @RequestParam(defaultValue = "", name = "user_name") String user_name, HttpSession session) {
+    public Object toUserMatching(@RequestParam(defaultValue = "", name = "event_id") String event_id, @RequestParam(defaultValue = "", name = "user_id") String user_id, HttpSession session) {
         Map<String, Object> data = new HashMap<>();
-        data.put("user_name", user_name);
-        data.put("even_name", even_name);
-        session.setAttribute("userMatching-dataInfo", data);
+        data.put("user_id", user_id);
+        data.put("event_id", event_id);
+        session.setAttribute("UM-dataInfo", data);
         return new ModelAndView("user/userMatching");
     }
 
     @RequestMapping("getDataInfo")
     public Object getDataInfo(HttpSession session) {
-        Map<String, Object> data = (Map<String, Object>) session.getAttribute("userMatching-dataInfo");
-        return ReponseCode.ok().data("dataInfo", data);
+        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> data = (Map<String, Object>) session.getAttribute("UM-dataInfo");
+        if (data.containsKey("event_id") && !"".equals(data.get("event_id"))) {
+            resultMap.put("event_name", eventService.getById(data.get("event_id").toString()).getName());
+        }
+        if (data.containsKey("user_id") && !"".equals(data.get("user_id"))) {
+            resultMap.put("user_name", userService.getById(data.get("user_id").toString()).getUserName());
+        }
+        return ReponseCode.ok().data("dataInfo", resultMap);
     }
 
-    @RequestMapping("getEvenInfo")
-    public Object getEvenInfo(HttpSession session) {
+    @RequestMapping("getUAbaseData")
+    public Object getUAbaseData(HttpSession session) {
         Map<String, Object> resultMap = new HashMap<>();
 
-        List<Map<String, Object>> evenList = new ArrayList<>();//所有事件
-        evenList.add(JSONObject.parseObject("{id:\"1\",value:\"如果不生小孩老了怎么办\",key:\"one\"}"));
-        evenList.add(JSONObject.parseObject("{id:\"2\",value:\"事件12\",key:\"two\"}"));
-        evenList.add(JSONObject.parseObject("{id:\"3\",value:\"事件13\",key:\"three\"}"));
-        evenList.add(JSONObject.parseObject("{id:\"4\",value:\"事件14\",key:\"four\"}"));
-        resultMap.put("evenList", evenList);
+        List<Event> events = eventService.list(null);
+        List<Map<String, Object>> eventList = new ArrayList<>();
+        for (Event event : events) {
+            eventList.add(JSONObject.parseObject("{value:\"" + event.getName() + "\",key:\"" + event.getId() + "\"}"));
+        }
+        resultMap.put("eventList", eventList);
 
-
-        List<Map<String, Object>> sourceAppList = new ArrayList<>();//所有平台
-        sourceAppList.add(JSONObject.parseObject("{id:\"1\",value:\"weibo\",key:\"one\"}"));
-        sourceAppList.add(JSONObject.parseObject("{id:\"2\",value:\"douban\",key:\"two\"}"));
-        sourceAppList.add(JSONObject.parseObject("{id:\"3\",value:\"twitter\",key:\"three\"}"));
-        sourceAppList.add(JSONObject.parseObject("{id:\"4\",value:\"facebook\",key:\"four\"}"));
+        List<SourceApp> sourceApps = sourceAppService.list(null);
+        List<Map<String, Object>> sourceAppList = new ArrayList<>();
+        for (SourceApp sourceApp : sourceApps) {
+            sourceAppList.add(JSONObject.parseObject("{value:\"" + sourceApp.getName() + "\",key:\"" + sourceApp.getId() + "\"}"));
+        }
         resultMap.put("sourceAppList", sourceAppList);
 
-        List<Map<String, Object>> userlist = new ArrayList<>();//所有平台
-        userlist.add(JSONObject.parseObject("{id:\"1\",value:\"特立独行的猫\",key:\"one\"}"));
-        userlist.add(JSONObject.parseObject("{id:\"2\",value:\"douban\",key:\"two\"}"));
-        userlist.add(JSONObject.parseObject("{id:\"3\",value:\"twitter\",key:\"three\"}"));
-        userlist.add(JSONObject.parseObject("{id:\"4\",value:\"facebook\",key:\"four\"}"));
-        resultMap.put("userList", userlist);
+        Map<String, Object> dataInfo = new HashMap<>();
+        dataInfo.put("event_id", session.getAttribute("UA_even_id"));
 
-        Map<String, Object> evenInfo = new HashMap<>();//选择的默认事件
-        evenInfo.put("even_id", "one");
-        resultMap.put("evenInfo", evenInfo);
+        resultMap.put("dataInfo", dataInfo);
 
         return ReponseCode.ok().data(resultMap);
     }
 
     @RequestMapping("getAppListByEven")
-    public Object getAppListByEven(@RequestBody Map<String, Object> data){
-        String even_id=data.get("even_id").toString();
+    public Object getAppListByEven(@RequestBody Map<String, Object> data) {
+        String event_id = data.get("event_id").toString();
         List<Map<String, Object>> sourceAppList = new ArrayList<>();//通过事件查平台列表
-        sourceAppList.add(JSONObject.parseObject("{id:\"1\",value:\"weibo\",key:\"one\"}"));
-        sourceAppList.add(JSONObject.parseObject("{id:\"2\",value:\"douban\",key:\"two\"}"));
-        sourceAppList.add(JSONObject.parseObject("{id:\"3\",value:\"twitter\",key:\"three\"}"));
-        sourceAppList.add(JSONObject.parseObject("{id:\"4\",value:\"facebook\",key:\"four\"}"));
-        return ReponseCode.ok().data("appList",sourceAppList);
+        QueryWrapper<BlogNews> blogNewsQueryWrapper = new QueryWrapper();
+        blogNewsQueryWrapper.eq("event_id", event_id);
+        Set<String> appIds=new HashSet<>();
+        List<BlogNews> BlogNewsLists = blogNewsService.list(blogNewsQueryWrapper);
+        for (BlogNews blogNews : BlogNewsLists) {
+            if (!appIds.contains(blogNews.getSrcAppId()+"")) {
+                appIds.add(blogNews.getSrcAppId()+"");
+                SourceApp item = sourceAppService.getById(blogNews.getSrcAppId());
+                sourceAppList.add(JSONObject.parseObject("{value:\""+item.getName()+"\",key:\""+item.getId()+"\"}"));
+            }
+        }
+        return ReponseCode.ok().data("appList", sourceAppList);
     }
 
     @RequestMapping("getUserListByApp")
     public Object getUserListByApp(@RequestBody Map<String, Object> data) {
-        System.err.println(data.get("app_id"));
-        //根据平台查用户列表
         List<Map<String, Object>> userlist = new ArrayList<>();
-        userlist.add(JSONObject.parseObject("{id:\"1\",value:\"特立独行的猫\",key:\"one\"}"));
-        userlist.add(JSONObject.parseObject("{id:\"2\",value:\"douban\",key:\"two\"}"));
-        userlist.add(JSONObject.parseObject("{id:\"3\",value:\"twitter\",key:\"three\"}"));
-        userlist.add(JSONObject.parseObject("{id:\"4\",value:\"facebook\",key:\"four\"}"));
+        if (data.containsKey("id")) {
+            String appId = data.get("id").toString();
 
+            QueryWrapper<User> userQueryWrapper = new QueryWrapper();
+            userQueryWrapper.eq("src_app_id", appId);
+            List<User> users = userService.list(userQueryWrapper);
+            for (User user : users) {
+                userlist.add(JSONObject.parseObject("{value:\"" + user.getUserName() + "\",key:\"" + user.getId() + "\"}"));
+            }
+        }
         return ReponseCode.ok().data("userlist", userlist);
     }
 

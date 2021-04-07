@@ -23,7 +23,7 @@
     }
 </style>
 <div id="app">
-    <el-form ref="form" :model="evenInfo" label-width="120">
+    <el-form ref="form" :model="dataInfo" label-width="120">
         <el-container>
             <el-header height="140">
                 <div class="container">
@@ -35,8 +35,8 @@
                         </div>
                         <el-row>
                             <el-col :span="12">
-                                <el-form-item label="事件名称" prop="even_id">
-                                    <el-select @change="selectEven" filterable size="mini" v-model="evenInfo.even_id">
+                                <el-form-item label="事件名称" prop="event_id">
+                                    <el-select @change="selectEven" filterable size="mini" v-model="dataInfo.event_id">
                                         <el-option v-for="item in evenList" :label="item.value" :key="item.key"
                                                    :value="item.key"></el-option>
                                     </el-select>
@@ -44,7 +44,7 @@
                             </el-col>
                             <el-col :span="12">
                                 <el-form-item label="平台范围" prop="sourceApps">
-                                    <el-select size="mini" multiple v-model="evenInfo.sourceApps">
+                                    <el-select size="mini" multiple v-model="dataInfo.sourceApps">
                                         <el-option v-for="item in appList" :label="item.value" :key="item.key"
                                                    :value="item.key"></el-option>
                                     </el-select>
@@ -71,7 +71,7 @@
                                 <el-row>
                                     <el-col :span="24">
                                         <el-form-item label="主账号平台" prop="user_inApp">
-                                            <el-select @change="selectInApp" size="mini" v-model="evenInfo.user_inApp">
+                                            <el-select @change="selectInApp" size="mini" v-model="dataInfo.user_inApp">
                                                 <el-option v-for="item in sourceAppList" :label="item.value"
                                                            :key="item.key"
                                                            :value="item.key"></el-option>
@@ -82,7 +82,7 @@
                                 <el-row>
                                     <el-col :span="24">
                                         <el-form-item label="主账号" prop="user_id">
-                                            <el-select size="mini" v-model="evenInfo.user_id">
+                                            <el-select size="mini" v-model="dataInfo.user_id">
                                                 <el-option v-for="item in userList" :label="item.value" :key="item.key"
                                                            :value="item.key"></el-option>
                                             </el-select>
@@ -161,108 +161,36 @@
         new agGrid.Grid(eGridDiv, gridOptions);
     });
 
-    var baseData = getJson("../user/getEvenInfo");
+    var baseData = getJson("../user/getUAbaseData");
     var v = new Vue({
         el: "#app",
         data: function () {
             return {
                 appList:[],
-                evenInfo: baseData.evenInfo || {},
+                dataInfo: baseData.dataInfo || {},
                 evenList: baseData.evenList || [],
                 sourceAppList: baseData.sourceAppList || [],
                 userList: [],
                 percentage: 100,
-                ddf:{
-                    rules:{
-                        name:_sv("r"),
-                        remark:_sv("r"),
-                        dataset_id:_sv("r"),
-                        value_expression:_sv("r"),
-                        date_expression:_sv("r")
-                    },
-                    data:null,
-                    items:[{
-                        key:"name",
-                        value:"指标名称"
-                    },{
-                        key:"remark",
-                        value:"备注"
-                    },{
-                        key:"dataset_id",
-                        value:"数据集",
-                        type:"select",
-                        children:[],
-                        // change:function(vv){
-                        //     if(vv){
-                        //         var result=getJson("getColumnsByDataSetId",{id:vv});
-                        //         if(result&&result.success){
-                        //             v.data.ddf.items[4].children=result.resultList;
-                        //         }else{
-                        //             se(result.msg);
-                        //         }
-                        //     }else{
-                        //         v.data.ddf.items[4].children=[];
-                        //         v.data.ddf.group_columns=null;
-                        //     }
-                        // }
-                    },{
-                        key:"value_expression",
-                        value:"值表达式"
-                    },{
-                        key:"group_columns",
-                        value:"分组表达式",
-                        type:"select",
-                        multiple:true,
-                        children:[]
-                    },{
-                        key:"date_expression",
-                        value:"日期表达式",
-                        type:"select",
-                        children:[]
-                    }],
-                    title:null,
-                    show:false,
-                    buttons:[{
-                        value:"保存",
-                        handler:function(){
-                            v.$refs.qfdt.validate().then(function(){
-                                var tData=copy(v.data.ddf.data);
-                                var t="";
-                                if(v.data.ddf.data.group_columns.length>0){
-                                    for(var ele in v.data.ddf.data.group_columns){
-                                        t+=v.data.ddf.data.group_columns[ele]+",";
-                                    }
-                                    t=t.substring(0,t.length-1);
-                                }
-                                tData.group_columns=t;
-                                var result=getJson("saveData",tData);
-                                if(result&&result.success){
-                                    ss("保存成功");
-                                    v.$refs.qfdt.flushData();
-                                    v.data.ddf.show=false;
-                                }else{
-                                    se(result.msg);
-                                }
-                            });
-                        }
-                    },{
-                        value:"关闭",
-                        handler:function(){
-                            v.data.ddf.show=false;
-                        }
-                    }]
-                }
             }
         },
         methods: {
             toMatching:function(){
-                location.href="../user/toUserMatching?even_name=老了怎么伴&user_name=linux";
+                if (dataInfo.event_id||dataInfo.event_id[0]||dataInfo.event_id[0]==''){
+                    sw("请选择事件")
+                    return;
+                }
+                if (dataInfo.user_id||dataInfo.user_id[0]||dataInfo.user_id[0]==''){
+                    sw("请选择主账号")
+                    return;
+                }
+                location.href="../user/toUserMatching?event_id="+dataInfo.event_id[0]+"&user_id="+dataInfo.user_id[0];
             },
             selectInApp: function (val) {
-                var result = getJson("../user/getUserListByApp", {app_id: val});
-                if (result && result.success) {
-                    v.evenInfo.user_id=[]
-                    v.userList=result.data.userlist
+                var result = getJson("../user/getUserListByApp", {id: val});
+                if (result && result.userlist) {
+                    v.dataInfo.user_id=[]
+                    v.userList=result.userlist
                 }
             },
             startAss: function () {
@@ -280,15 +208,14 @@
                             ]);
                             clearInterval(int)
                         }
-                    }, 100)
+                    }, 50)
                 },500)
             },
             selectEven: function (val) {
                 if (val) {
-                    var result = getJson("getAppListByEven", {even_id: val});
-                    if (result && result.success) {
-                        v.appList=[]
-                        console.log(result)
+                    var result = getJson("getAppListByEven", {event_id: val});
+                    if (result) {
+                        v.appList=result.appList
                     }
                 }
             }

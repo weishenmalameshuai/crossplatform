@@ -153,7 +153,11 @@ public class EventController {
             resultList.add(map);
         }
 
-        return ReponseCode.ok().data("event_info",resultList);
+        Map<String,Object> result=new HashMap<>();
+        result.put("event_info",resultList);
+        result.put("event_id",eventId);
+
+        return ReponseCode.ok().data(result);
     }
 
     //查询(列表数据)
