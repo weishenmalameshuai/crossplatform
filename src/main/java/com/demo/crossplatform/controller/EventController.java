@@ -1,6 +1,7 @@
 package com.demo.crossplatform.controller;
 
 
+import com.alibaba.excel.EasyExcelFactory;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.alibaba.fastjson.JSONObject;
@@ -15,6 +16,7 @@ import com.demo.crossplatform.service.BlogNewsService;
 import com.demo.crossplatform.service.EventService;
 import com.demo.crossplatform.service.SourceAppService;
 import com.demo.crossplatform.service.UserService;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +27,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.transform.Source;
 
@@ -283,6 +288,7 @@ public class EventController {
             if (user == null) {
                 user = new User();
                 user.setUserName(eventExcel.getUser_name());
+                user.setSrcAppId(sourceApp.getId());
                 userService.save(user);
             }
 
@@ -298,6 +304,65 @@ public class EventController {
         }
 
         return ReponseCode.ok();
+    }
+
+
+    @RequestMapping("/download")
+    public void download(@RequestBody Map<String, Object> data,
+                         HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        int eventId = (int) data.get("event_id");
+        QueryWrapper<Event> eventQueryWrapper = new QueryWrapper();
+        eventQueryWrapper.eq("id", eventId);
+        Event event = eventService.getOne(eventQueryWrapper);
+
+
+
+        QueryWrapper<BlogNews> blogNewsQueryWrapper = new QueryWrapper();
+        blogNewsQueryWrapper.eq("event_id", eventId);
+        List<BlogNews> BlogNewsLists = blogNewsService.list(blogNewsQueryWrapper);
+
+        //构建条件
+        QueryWrapper<SourceApp> sourceAppQueryWrapper;
+        //构建条件
+        QueryWrapper<User> userQueryWrapper;
+
+        List<EventExcel> eventExcels = new ArrayList();
+
+        for (BlogNews blogNews : BlogNewsLists) {
+
+            int srcAppId = blogNews.getSrcAppId();
+            int userId = blogNews.getUserId();
+
+            sourceAppQueryWrapper = new QueryWrapper();
+            sourceAppQueryWrapper.eq("id", srcAppId);
+            SourceApp sourceApp = sourceAppService.getOne(sourceAppQueryWrapper);
+
+            userQueryWrapper = new QueryWrapper();
+            userQueryWrapper.eq("id", userId);
+            User user = userService.getOne(userQueryWrapper);
+
+            EventExcel eventExcel = new EventExcel();
+            eventExcel.setSource_app_name(sourceApp.getName());
+            eventExcel.setUser_name(user.getUserName());
+            eventExcel.setContent(blogNews.getContent());
+            eventExcel.setLssue_date(blogNews.getCreateTime().toString());
+            eventExcel.setEventName(event.getName());
+            eventExcels.add(eventExcel);
+        }
+
+        try {
+
+
+            String name = event.getName() + ".xls";
+            String fileName = new String(name.getBytes(), "ISO-8859-1");
+            response.addHeader("Content-Disposition", "filename=" + fileName);
+            ServletOutputStream out = response.getOutputStream();
+            EasyExcelFactory.write(out, BlogNewsExcel.class).sheet("Sheet1").doWrite(eventExcels);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
 }

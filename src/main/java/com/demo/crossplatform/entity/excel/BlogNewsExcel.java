@@ -11,16 +11,16 @@ import java.io.Serializable;
 public class BlogNewsExcel implements Serializable {
 
     private static final long serialVersionUID = 1411000936667843153L;
-    @ExcelProperty(index = 0)
+    @ExcelProperty(value = "平台", index = 0)
     private String source_app_name;
 
-    @ExcelProperty(index = 1)
+    @ExcelProperty(value = "用户名", index = 1)
     private String user_name;
 
-    @ExcelProperty(index = 2)
+    @ExcelProperty(value= "发文日期", index = 2)
     private String lssue_date;
 
-    @ExcelProperty(index = 3)
+    @ExcelProperty(value = "博文内容", index = 3)
     private String content;
 
 }
