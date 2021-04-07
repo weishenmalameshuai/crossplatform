@@ -5,8 +5,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.crossplatform.commonutils.ReponseCode;
+import com.demo.crossplatform.entity.BlogNews;
 import com.demo.crossplatform.entity.Event;
+import com.demo.crossplatform.entity.SourceApp;
+import com.demo.crossplatform.entity.User;
+import com.demo.crossplatform.service.BlogNewsService;
 import com.demo.crossplatform.service.EventService;
+import com.demo.crossplatform.service.SourceAppService;
+import com.demo.crossplatform.service.UserService;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +23,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.servlet.http.HttpSession;
+import javax.xml.transform.Source;
 
 /**
  * <p>
@@ -32,8 +39,12 @@ public class EventController {
 
     @Resource
     private EventService eventService;
-    private static final DateFormat datetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+    @Resource
+    private UserService userService;
+    @Resource
+    private BlogNewsService blogNewsService;
+    @Resource
+    private SourceAppService sourceAppService;
 
     @RequestMapping("toPage")
     public Object toPage(){
@@ -96,12 +107,49 @@ public class EventController {
     }
 
     @RequestMapping("getBaseData")
-    public Object getBaseData() {
-        List<Map<String,Object>> resultList=new ArrayList<>();
-        resultList.add(JSONObject.parseObject("{id:\"1\",user_id:\"1\",sourceApp_name:\"pingtai1\",user_name:\"张三\",description:\"张三的描述\",blog_num:\"20\"}"));
-        resultList.add(JSONObject.parseObject("{id:\"2\",user_id:\"1\",sourceApp_name:\"pingtai2\",user_name:\"里斯\",description:\"里斯的描述\",blog_num:\"24\"}"));
-        resultList.add(JSONObject.parseObject("{id:\"3\",user_id:\"1\",sourceApp_name:\"pingtai3\",user_name:\"撒旦\",description:\"撒旦的描述\",blog_num:\"11\"}"));
-        resultList.add(JSONObject.parseObject("{id:\"4\",user_id:\"1\",sourceApp_name:\"pingtai4\",user_name:\"迪迦\",description:\"迪迦的描述\",blog_num:\"4255\"}"));
+    public Object getBaseData(HttpSession session) {
+
+        String eventId = (String) session.getAttribute("event_id");
+
+        //构建条件
+        QueryWrapper<BlogNews> blogNewsQueryWrapper = new QueryWrapper();
+        blogNewsQueryWrapper.eq("event_id", eventId);
+
+        Map<Integer, Integer> userMap = new HashMap();
+        List<BlogNews> BlogNewsLists = blogNewsService.list(blogNewsQueryWrapper);
+
+        for (BlogNews blogNews : BlogNewsLists) {
+            int userid = blogNews.getUserId();
+            if (userMap.containsKey(userid)) {
+                int BlogNewsCount = userMap.get(userid);
+                userMap.put(userid, ++BlogNewsCount);
+            }
+            else {
+                userMap.put(userid, 1);
+            }
+        }
+
+        List< Map<String, Object>> resultList = new ArrayList<>();
+        Map<String, Object> map;
+        for (Map.Entry<Integer, Integer> entry : userMap.entrySet()) {
+
+            map = new HashMap();
+
+            int userId = entry.getKey();
+            int BlogNewsCount = entry.getValue();
+
+            User user = userService.getById(userId);
+            SourceApp sourceApp = sourceAppService.getById(user.getSrcAppId());
+
+            map.put("user_id", String.valueOf(userId));
+            map.put("blog_num", String.valueOf(BlogNewsCount));
+            map.put("user_name", user.getUserName());
+            map.put("description", user.getDescription());
+            map.put("sourceApp_name", sourceApp.getName());
+            map.put("src_app_id", sourceApp.getId());
+            resultList.add(map);
+        }
+
         return ReponseCode.ok().data("event_info",resultList);
     }
 

@@ -2,6 +2,7 @@ package com.demo.crossplatform.service;
 
 import com.demo.crossplatform.entity.Event;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
@@ -13,4 +14,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface EventService extends IService<Event> {
 
+    //导入
+    void doBatchImport(MultipartFile file,EventService eventService);
 }
