@@ -95,6 +95,17 @@ public class UserController {
         return ReponseCode.ok().data(resultMap);
     }
 
+    @RequestMapping("getAppListByEven")
+    public Object getAppListByEven(@RequestBody Map<String, Object> data){
+        String even_id=data.get("even_id").toString();
+        List<Map<String, Object>> sourceAppList = new ArrayList<>();//通过事件查平台列表
+        sourceAppList.add(JSONObject.parseObject("{id:\"1\",value:\"weibo\",key:\"one\"}"));
+        sourceAppList.add(JSONObject.parseObject("{id:\"2\",value:\"douban\",key:\"two\"}"));
+        sourceAppList.add(JSONObject.parseObject("{id:\"3\",value:\"twitter\",key:\"three\"}"));
+        sourceAppList.add(JSONObject.parseObject("{id:\"4\",value:\"facebook\",key:\"four\"}"));
+        return ReponseCode.ok().data("appList",sourceAppList);
+    }
+
     @RequestMapping("getUserListByApp")
     public Object getUserListByApp(@RequestBody Map<String, Object> data) {
         System.err.println(data.get("app_id"));

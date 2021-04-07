@@ -10,12 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * <p>
@@ -31,6 +29,8 @@ public class EventController {
 
     @Resource
     private EventService eventService;
+    private static final DateFormat datetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 
     @RequestMapping("toPage")
     public Object toPage(){
@@ -59,10 +59,10 @@ public class EventController {
     public Object getData(@RequestBody Map<String, Object> data) {
         //输出data查看分页 参数
         List<Map<String,Object>> resultList=new ArrayList<>();
-        resultList.add(JSONObject.parseObject("{id:\"1\",event_name:\"事件1\",addtime:\"2021-4-6\"}"));
-        resultList.add(JSONObject.parseObject("{id:\"2\",event_name:\"事件2\",addtime:\"2021-4-6\"}"));
-        resultList.add(JSONObject.parseObject("{id:\"3\",event_name:\"事件3\",addtime:\"2021-4-6\"}"));
-        resultList.add(JSONObject.parseObject("{id:\"4\",event_name:\"事件4\",addtime:\"2021-4-6\"}"));
+        resultList.add(JSONObject.parseObject("{id:\"1\",name:\"事件1\",createTime:\"2021-4-6\"}"));
+        resultList.add(JSONObject.parseObject("{id:\"2\",name:\"事件2\",createTime:\"2021-4-6\"}"));
+        resultList.add(JSONObject.parseObject("{id:\"3\",name:\"事件3\",createTime:\"2021-4-6\"}"));
+        resultList.add(JSONObject.parseObject("{id:\"4\",name:\"事件4\",createTime:\"2021-4-6\"}"));
         Map<String,Object> resultMap=new HashMap<>();
         resultMap.put("rows",resultList);
         resultMap.put("total",resultList.size());
@@ -110,8 +110,9 @@ public class EventController {
     }
 
     //查询(单条数据)
-    @GetMapping("select/{id}")
+    @PostMapping("select/{id}")
     public ReponseCode doSelect(@PathVariable("id") int id) {
+        System.err.println(id);
         Event event = eventService.getById(id);
         return ReponseCode.ok().data("event", event);
     }
@@ -119,7 +120,6 @@ public class EventController {
     //新增方法
     @PostMapping("insert")
     public ReponseCode doInsert(@RequestBody Event event) {
-
         if (eventService.save(event)) {
             return ReponseCode.ok().data("event", event);
         }

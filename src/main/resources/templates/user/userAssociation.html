@@ -45,7 +45,7 @@
                             <el-col :span="12">
                                 <el-form-item label="平台范围" prop="sourceApps">
                                     <el-select size="mini" multiple v-model="evenInfo.sourceApps">
-                                        <el-option v-for="item in sourceAppList" :label="item.value" :key="item.key"
+                                        <el-option v-for="item in appList" :label="item.value" :key="item.key"
                                                    :value="item.key"></el-option>
                                     </el-select>
                                 </el-form-item>
@@ -166,23 +166,92 @@
         el: "#app",
         data: function () {
             return {
-                cols: [{
-                    key: "sourceApp_name",
-                    value: "平台"
-                }, {
-                    key: "user_name",
-                    value: "用户名"
-                }, {
-                    key: "likes",
-                    value: "匹配度"
-                }],
-                coltableheight: 240,
-                coldata: [],
+                appList:[],
                 evenInfo: baseData.evenInfo || {},
                 evenList: baseData.evenList || [],
                 sourceAppList: baseData.sourceAppList || [],
                 userList: [],
                 percentage: 100,
+                ddf:{
+                    rules:{
+                        name:_sv("r"),
+                        remark:_sv("r"),
+                        dataset_id:_sv("r"),
+                        value_expression:_sv("r"),
+                        date_expression:_sv("r")
+                    },
+                    data:null,
+                    items:[{
+                        key:"name",
+                        value:"指标名称"
+                    },{
+                        key:"remark",
+                        value:"备注"
+                    },{
+                        key:"dataset_id",
+                        value:"数据集",
+                        type:"select",
+                        children:[],
+                        // change:function(vv){
+                        //     if(vv){
+                        //         var result=getJson("getColumnsByDataSetId",{id:vv});
+                        //         if(result&&result.success){
+                        //             v.data.ddf.items[4].children=result.resultList;
+                        //         }else{
+                        //             se(result.msg);
+                        //         }
+                        //     }else{
+                        //         v.data.ddf.items[4].children=[];
+                        //         v.data.ddf.group_columns=null;
+                        //     }
+                        // }
+                    },{
+                        key:"value_expression",
+                        value:"值表达式"
+                    },{
+                        key:"group_columns",
+                        value:"分组表达式",
+                        type:"select",
+                        multiple:true,
+                        children:[]
+                    },{
+                        key:"date_expression",
+                        value:"日期表达式",
+                        type:"select",
+                        children:[]
+                    }],
+                    title:null,
+                    show:false,
+                    buttons:[{
+                        value:"保存",
+                        handler:function(){
+                            v.$refs.qfdt.validate().then(function(){
+                                var tData=copy(v.data.ddf.data);
+                                var t="";
+                                if(v.data.ddf.data.group_columns.length>0){
+                                    for(var ele in v.data.ddf.data.group_columns){
+                                        t+=v.data.ddf.data.group_columns[ele]+",";
+                                    }
+                                    t=t.substring(0,t.length-1);
+                                }
+                                tData.group_columns=t;
+                                var result=getJson("saveData",tData);
+                                if(result&&result.success){
+                                    ss("保存成功");
+                                    v.$refs.qfdt.flushData();
+                                    v.data.ddf.show=false;
+                                }else{
+                                    se(result.msg);
+                                }
+                            });
+                        }
+                    },{
+                        value:"关闭",
+                        handler:function(){
+                            v.data.ddf.show=false;
+                        }
+                    }]
+                }
             }
         },
         methods: {
@@ -198,69 +267,30 @@
             },
             startAss: function () {
                 v.percentage = 0
-                var int = setInterval(function () {
-                    v.percentage++
-                    if (v.percentage == 100) {
-                        data=[
-                            {sourceApp_name: "weibo", user_name: "一直独立孤行的侠", likes: "0.89"},
-                            {sourceApp_name: "weibo", user_name: "一只想飞的狸花猫", likes: "0.72"},
-                            {sourceApp_name: "weibo", user_name: "神一样的甜甜猫", likes: "0.71"},
-                            {sourceApp_name: "weibo", user_name: "写一封信", likes: "0.59"},
-                            {sourceApp_name: "weibo", user_name: "X_小虎牙_T", likes: "0.51"},
-                        ]
-                        clearInterval(int)
-                    }
-                }, 100)
+                setTimeout(function () {
+                    var int = setInterval(function () {
+                        v.percentage++
+                        if (v.percentage == 100) {
+                            gridOptions.api.setRowData([
+                                {sourceApp_name: "weibo", user_name: "一直独立孤行的侠", likes: "0.89"},
+                                {sourceApp_name: "weibo", user_name: "一只想飞的狸花猫", likes: "0.72"},
+                                {sourceApp_name: "weibo", user_name: "神一样的甜甜猫", likes: "0.71"},
+                                {sourceApp_name: "weibo", user_name: "写一封信", likes: "0.59"},
+                                {sourceApp_name: "weibo", user_name: "X_小虎牙_T", likes: "0.51"},
+                            ]);
+                            clearInterval(int)
+                        }
+                    }, 100)
+                },500)
             },
             selectEven: function (val) {
                 if (val) {
-                    var result = getJson("getTableInfo", {name: val});
+                    var result = getJson("getAppListByEven", {even_id: val});
                     if (result && result.success) {
-                        v.coldata = [];
-                        v.sdata = [];
+                        v.appList=[]
+                        console.log(result)
                     }
                 }
-            },
-            saveData: function () {
-                v.$refs.planform.validate().then(function () {
-                    if (v.coldata.length == 0) {
-                        se("必须录入转换信息");
-                        return;
-                    }
-                    var isPrimary = false;
-                    for (var ele in v.coldata) {
-                        var item = v.coldata[ele];
-                        if (item.primary_key == 1) {
-                            if (isPrimary) {
-                                se("仅允许设置一列为主键");
-                                return;
-                            } else {
-                                isPrimary = true;
-                            }
-                        }
-                    }
-                    if (!isPrimary) {
-                        se("必须设置一列为主键");
-                        return;
-                    }
-                    var result = getJson("saveData", {
-                        plan: v.plan,
-                        items: v.coldata,
-                        static_items: v.srow
-                    });
-                    if (result && result.success) {
-                        ss("保存成功，5秒后返回,接口的api_id:" + result.api_id + ",api_key:" + result.api_key);
-                        setTimeout(function () {
-                            history.go(-1);
-                        }, 5000);
-                    } else {
-                        if (result && !result.testResult) {
-                            v.errorshow = true;
-                            v.errormsg = result.msg;
-                        }
-                        se("保存失败");
-                    }
-                });
             }
         }
     });
