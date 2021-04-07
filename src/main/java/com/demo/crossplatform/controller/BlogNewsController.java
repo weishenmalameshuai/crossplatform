@@ -105,6 +105,7 @@ public class BlogNewsController {
             if (user == null) {
                 user = new User();
                 user.setUserName(excel.getUser_name());
+                user.setSrcAppId(sourceApp.getId());
                 userService.save(user);
             }
 
@@ -127,6 +128,14 @@ public class BlogNewsController {
         return ReponseCode.ok();
     }
 
+
+    public Object deleteBlogNews(@RequestBody Map<String, Object> data) {
+
+
+
+
+        return ReponseCode.ok();
+    }
 
     //查询(列表数据)
     @GetMapping("search/{current}/{limit}")
