@@ -82,7 +82,7 @@
                                 <el-row>
                                     <el-col :span="24">
                                         <el-form-item label="主账号" prop="user_id">
-                                            <el-select size="mini" v-model="dataInfo.user_id">
+                                            <el-select size="mini" v-model="dataInfo.user_id" @change="selectChange">
                                                 <el-option v-for="item in userList" :label="item.value" :key="item.key"
                                                            :value="item.key"></el-option>
                                             </el-select>
@@ -218,6 +218,11 @@
                         v.appList=result.appList
                     }
                 }
+            },
+            selectChange: function (val) {
+                setTimeout(function () {
+                    dataInfo.user_id = val;
+                },500)
             }
         }
     });

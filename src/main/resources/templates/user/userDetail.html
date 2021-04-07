@@ -121,7 +121,7 @@
                     sw("请上传用户头像！")
                 }
                 v.$refs.userform.validate().then(function () {
-                    var result = getJson("update", v.user);
+                    var result = getJson("../user/update", v.user);
                     if (result) {
                         ss()
                     }

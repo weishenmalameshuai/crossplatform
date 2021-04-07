@@ -230,8 +230,14 @@ public class UserController {
     }
 
     //更新方法
-    @PostMapping("update")
-    public ReponseCode doUpdate(@RequestBody User user) {
+    @RequestMapping("update")
+    public ReponseCode doUpdate(@RequestBody Map<String, Object> data) {
+
+        User user = new User();
+        user.setId(Integer.parseInt(data.get("id") + ""));
+        user.setUserName(data.get("user_name") + "");
+        user.setDescription(data.get("description") + "");
+        user.setPhotoLoc(data.get("photo_loc") + "");
 
         if (userService.updateById(user)) {
             return ReponseCode.ok().data("user", user);

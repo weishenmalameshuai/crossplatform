@@ -128,13 +128,22 @@ public class BlogNewsController {
         return ReponseCode.ok();
     }
 
-
+    @RequestMapping("batchDelBlogNews")
     public Object deleteBlogNews(@RequestBody Map<String, Object> data) {
 
+        Object event_id = data.get("event_id");
+        Object user_id = data.get("user_id");
 
-
-
-        return ReponseCode.ok();
+        //构建条件
+        QueryWrapper<BlogNews> blogNewsQueryWrapper = new QueryWrapper();
+        blogNewsQueryWrapper.eq("event_id", event_id);
+        blogNewsQueryWrapper.eq("user_id", user_id);
+        if (blogNewsService.remove(blogNewsQueryWrapper)) {
+            return ReponseCode.ok();
+        }
+        else {
+            return ReponseCode.error();
+        }
     }
 
     //查询(列表数据)
