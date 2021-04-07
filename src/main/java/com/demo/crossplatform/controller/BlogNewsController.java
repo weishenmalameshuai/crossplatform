@@ -5,8 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.demo.crossplatform.commonutils.ReponseCode;
 import com.demo.crossplatform.entity.BlogNews;
+import com.demo.crossplatform.entity.excel.BlogNewsExcel;
 import com.demo.crossplatform.service.BlogNewsService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
@@ -36,16 +38,12 @@ public class BlogNewsController {
     }
 
     @RequestMapping("uploadFile")
-    public Object uploadFile(){
-        //上传文件，处理文件，返回数据
-        List<Map<String,Object>> blogList=new ArrayList<>();
-        blogList.add(JSONObject.parseObject("{id:\"1\",sourceApp_name:\"pingtai1\",create_time:\"2021-3-31\",user_name:\"张三\",content:\"内容1\"}"));
-        blogList.add(JSONObject.parseObject("{id:\"2\",sourceApp_name:\"pingtai2\",create_time:\"2021-2-2\",user_name:\"里斯\",content:\"内容2\"}"));
-        blogList.add(JSONObject.parseObject("{id:\"3\",sourceApp_name:\"pingtai3\",create_time:\"2021-1-31\",user_name:\"撒旦\",content:\"内容3\"}"));
-        blogList.add(JSONObject.parseObject("{id:\"4\",sourceApp_name:\"pingtai4\",create_time:\"2021-1-20\",user_name:\"迪迦\",content:\"内容4\"}"));
+    public Object uploadFile(@RequestBody MultipartFile file){
+
+        List<BlogNewsExcel> blogList = blogNewsService.doBatchImport(file, blogNewsService);
+
         return ReponseCode.ok().data("blogList",blogList);
     }
-
     //查询(列表数据)
     @GetMapping("search/{current}/{limit}")
     public ReponseCode doSearch(@PathVariable long current,

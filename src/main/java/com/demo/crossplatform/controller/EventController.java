@@ -9,6 +9,8 @@ import com.demo.crossplatform.entity.BlogNews;
 import com.demo.crossplatform.entity.Event;
 import com.demo.crossplatform.entity.SourceApp;
 import com.demo.crossplatform.entity.User;
+import com.demo.crossplatform.entity.excel.BlogNewsExcel;
+import com.demo.crossplatform.entity.excel.EventExcel;
 import com.demo.crossplatform.service.BlogNewsService;
 import com.demo.crossplatform.service.EventService;
 import com.demo.crossplatform.service.SourceAppService;
@@ -226,12 +228,12 @@ public class EventController {
 
     }
 
+    @RequestMapping("uploadFile")
+    public Object uploadFile(@RequestBody MultipartFile file){
 
-    //导入
-    @PostMapping("import")
-    public ReponseCode doImport(MultipartFile file) {
-        eventService.doBatchImport(file, eventService);
-        return ReponseCode.ok();
+        List<EventExcel> eventExcels = eventService.doBatchImport(file, eventService);
+
+        return ReponseCode.ok().data("blogList",eventExcels);
     }
 
 }

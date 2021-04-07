@@ -35,9 +35,30 @@
                     <el-form ref="converterForm" label-width="120">
                         <el-row>
                             <el-col :span="12">
-                                <el-form-item label="上传excel" prop="fileId">
+                                <el-form-item label="选择Excel">
+                                    <el-upload
+                                            ref="upload"
+                                            :auto-upload="false"
+                                            :on-success="fileUploadSuccess"
+                                            :on-error="fileUploadError"
+                                            :disabled="importBtnDisabled"
+                                            :limit="1"
+                                            :action="action"
+                                            name="file"
+                                            accept="application/vnd.ms-excel">
+                                        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                                        <el-button
+                                                :loading="loading"
+                                                style="margin-left: 10px;"
+                                                size="small"
+                                                type="success"
+                                                @click="submitUpload">上传到服务器</el-button>
+                                    </el-upload>
+                                </el-form-item>
+                                <!--<el-form-item label="上传excel" prop="fileId">
                                     <el-upload ref="upload" :before-upload="fileTypeHandler" :http-request="uploadFile"
                                                :auto-upload="false" :limit="1" :multiple="true" :file-list="files"
+                                               name="file"
                                                :action="action">
                                         <el-button slot="trigger" :disabled.sync="buttonS" size="small" type="primary">
                                             请选择文件
@@ -49,7 +70,7 @@
                                         <el-tag v-show="uploadLogo=='2'" type="success">上传成功</el-tag>
                                         <el-tag v-show="uploadLogo=='3'" type="danger">上传失败</el-tag>
                                     </el-upload>
-                                </el-form-item>
+                                </el-form-item>-->
                             </el-col>
                         </el-row>
                     </el-form>
@@ -92,22 +113,50 @@
                 action:'../blogNews/uploadFile',
                 files: [],
                 cols: [{
-                    key: "sourceApp_name",
+                    key: "source_app_name",
                     value: "平台"
                 }, {
                     key: "user_name",
                     value: "用户名"
                 }, {
-                    key: "create_time",
+                    key: "lssue_date",
                     value: "发文日期"
                 }, {
                     key: "content",
                     value: "博文内容"
                 }],
-                rows: []
+                rows: [],
+                importBtnDisabled: false, // 按钮是否禁用,
+                loading: false
             }
         },
         methods: {
+            //点击按钮上传文件到接口里面
+            submitUpload() {
+                this.importBtnDisabled = true;
+                this.loading = true;
+                // js: document.getElementById("upload").submit()
+                this.$refs.upload.submit()
+            },
+            //上传成功
+            fileUploadSuccess(response) {
+                //提示信息
+                this.loading = false
+                this.$message({
+                    type: 'success',
+                    message: '读取博文成功!'
+                })
+                console.log(response);
+                this.rows = response.data.blogList;
+            },
+            //上传失败
+            fileUploadError() {
+                this.loading = false
+                this.$message({
+                    type: 'error',
+                    message: '读取博文失败！'
+                })
+            },
             submitUpload: function () {
                 v.fileData = new FormData();
                 v.$refs.upload.submit();

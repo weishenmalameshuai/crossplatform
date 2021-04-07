@@ -4,29 +4,24 @@ package com.demo.crossplatform.listener;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.demo.crossplatform.entity.Event;
+import com.demo.crossplatform.entity.excel.BlogNewsExcel;
 import com.demo.crossplatform.entity.excel.EventExcel;
 import com.demo.crossplatform.service.EventService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EventExcelListener extends AnalysisEventListener<EventExcel> {
 
-    public EventService eventService;
-    public EventExcelListener() {}
-    public EventExcelListener(EventService eventService) {
-        this.eventService = eventService;
+    private List<EventExcel> eventExcels = new ArrayList();
+
+    public List<EventExcel> getEventExcels() {
+        return eventExcels;
     }
 
     @Override
     public void invoke(EventExcel eventExcel, AnalysisContext analysisContext) {
-
-        //一行一行读取内容
-        if (eventExcel == null) {
-            return;
-        }
-
-        Event event = new Event();
-        //事件名称
-        event.setName(eventExcel.getEventName());
-        eventService.save(event);
+        eventExcels.add(eventExcel);
     }
 
     @Override

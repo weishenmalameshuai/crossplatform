@@ -55,7 +55,6 @@ public class BlogNews implements Serializable {
     /**
      * 创建时间
      */
-    @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 
 
