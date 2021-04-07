@@ -22,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.servlet.http.HttpSession;
@@ -234,6 +235,65 @@ public class EventController {
         List<EventExcel> eventExcels = eventService.doBatchImport(file, eventService);
 
         return ReponseCode.ok().data("blogList",eventExcels);
+    }
+
+    @RequestMapping("batchAddEvents")
+    public Object batchAddBlogNews(@RequestBody Map<String, Object> data,
+                                   HttpSession session) throws ParseException {
+
+        List<EventExcel> eventExcels = (List<EventExcel>) data.get("rows");
+
+        //构建条件
+        QueryWrapper<Event> eventQueryWrapper;
+        //构建条件
+        QueryWrapper<SourceApp> sourceAppQueryWrapper;
+        //构建条件
+        QueryWrapper<User> userQueryWrapper;
+
+        for (EventExcel eventExcel : eventExcels) {
+
+
+            eventQueryWrapper = new QueryWrapper();
+            eventQueryWrapper.eq("name", eventExcel.getEventName());
+            Event event = eventService.getOne(eventQueryWrapper);
+            if (event == null) {
+                event = new Event();
+                event.setName(eventExcel.getEventName());
+                eventService.save(event);
+            }
+
+            sourceAppQueryWrapper = new QueryWrapper();
+            sourceAppQueryWrapper.eq("name", eventExcel.getSource_app_name());
+            SourceApp sourceApp = sourceAppService.getOne(sourceAppQueryWrapper);
+
+            if (sourceApp == null) {
+                sourceApp = new SourceApp();
+                sourceApp.setName(eventExcel.getSource_app_name());
+                sourceAppService.save(sourceApp);
+            }
+
+            userQueryWrapper = new QueryWrapper();
+            userQueryWrapper.eq("userName", eventExcel.getUser_name());
+            User user = userService.getOne(userQueryWrapper);
+
+            if (user == null) {
+                user = new User();
+                user.setUserName(eventExcel.getUser_name());
+                userService.save(user);
+            }
+
+            BlogNews blogNews = new BlogNews();
+            blogNews.setSrcAppId(sourceApp.getId());
+            blogNews.setUserId(user.getId());
+            blogNews.setEventId((Integer) session.getAttribute("event_id"));
+            blogNews.setContent(eventExcel.getContent());
+            blogNews.setCreateTime(new SimpleDateFormat("yyyy-MM-dd")
+                    .parse(eventExcel.getLssue_date()));
+
+            blogNewsService.save(blogNews);
+        }
+
+        return ReponseCode.ok();
     }
 
 }

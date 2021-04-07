@@ -94,7 +94,7 @@
         </el-main>
         <el-footer height="50">
             <div class="container">
-                <el-button size="small" @click="saveData" type="primary">保存数据</el-button>
+                <el-button size="small" @click="addData" type="primary">保存数据</el-button>
                 <el-button size="small" @click="history.go(-1)">返回</el-button>
             </div>
         </el-footer>
@@ -264,6 +264,9 @@
                     sm("请上传excel文件");
                 }
             },
+            addData: function () {
+
+            }
         }
     });
 </script>

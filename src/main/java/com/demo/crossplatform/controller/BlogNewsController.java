@@ -2,16 +2,25 @@ package com.demo.crossplatform.controller;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.demo.crossplatform.commonutils.ReponseCode;
 import com.demo.crossplatform.entity.BlogNews;
+import com.demo.crossplatform.entity.SourceApp;
+import com.demo.crossplatform.entity.User;
 import com.demo.crossplatform.entity.excel.BlogNewsExcel;
 import com.demo.crossplatform.service.BlogNewsService;
+import com.demo.crossplatform.service.EventService;
+import com.demo.crossplatform.service.SourceAppService;
+import com.demo.crossplatform.service.UserService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +39,13 @@ import java.util.Map;
 public class BlogNewsController {
 
     @Resource
+    private EventService eventService;
+    @Resource
+    private UserService userService;
+    @Resource
     private BlogNewsService blogNewsService;
+    @Resource
+    private SourceAppService sourceAppService;
 
     @RequestMapping("toUpload")
     public Object toUpload(){
@@ -44,6 +59,55 @@ public class BlogNewsController {
 
         return ReponseCode.ok().data("blogList",blogList);
     }
+
+    @RequestMapping("batchAddBlogNews")
+    public Object batchAddBlogNews(@RequestBody Map<String, Object> data,
+                                   HttpSession session) throws ParseException {
+
+        List<BlogNewsExcel> blogNewsExcels = (List<BlogNewsExcel>) data.get("rows");
+
+        //构建条件
+        QueryWrapper<SourceApp> sourceAppQueryWrapper;
+        //构建条件
+        QueryWrapper<User> userQueryWrapper;
+
+        for (BlogNewsExcel excel : blogNewsExcels) {
+
+            sourceAppQueryWrapper = new QueryWrapper();
+            sourceAppQueryWrapper.eq("name", excel.getSource_app_name());
+            SourceApp sourceApp = sourceAppService.getOne(sourceAppQueryWrapper);
+
+            if (sourceApp == null) {
+                sourceApp = new SourceApp();
+                sourceApp.setName(excel.getSource_app_name());
+                sourceAppService.save(sourceApp);
+            }
+
+            userQueryWrapper = new QueryWrapper();
+            userQueryWrapper.eq("userName", excel.getUser_name());
+            User user = userService.getOne(userQueryWrapper);
+
+            if (user == null) {
+                user = new User();
+                user.setUserName(excel.getUser_name());
+                userService.save(user);
+            }
+
+            BlogNews blogNews = new BlogNews();
+            blogNews.setSrcAppId(sourceApp.getId());
+            blogNews.setUserId(user.getId());
+            blogNews.setEventId((Integer) session.getAttribute("event_id"));
+            blogNews.setContent(excel.getContent());
+            blogNews.setCreateTime(new SimpleDateFormat("yyyy-MM-dd")
+                    .parse(excel.getLssue_date()));
+
+            blogNewsService.save(blogNews);
+        }
+
+        return ReponseCode.ok();
+    }
+
+
     //查询(列表数据)
     @GetMapping("search/{current}/{limit}")
     public ReponseCode doSearch(@PathVariable long current,
