@@ -1,12 +1,15 @@
 package com.demo.crossplatform.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.crossplatform.commonutils.ReponseCode;
 import com.demo.crossplatform.entity.Event;
 import com.demo.crossplatform.service.EventService;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
@@ -57,17 +60,38 @@ public class EventController {
 
     @RequestMapping("getData")
     public Object getData(@RequestBody Map<String, Object> data) {
-        //输出data查看分页 参数
-        List<Map<String,Object>> resultList=new ArrayList<>();
-        resultList.add(JSONObject.parseObject("{id:\"1\",name:\"事件1\",createTime:\"2021-4-6\"}"));
-        resultList.add(JSONObject.parseObject("{id:\"2\",name:\"事件2\",createTime:\"2021-4-6\"}"));
-        resultList.add(JSONObject.parseObject("{id:\"3\",name:\"事件3\",createTime:\"2021-4-6\"}"));
-        resultList.add(JSONObject.parseObject("{id:\"4\",name:\"事件4\",createTime:\"2021-4-6\"}"));
-        Map<String,Object> resultMap=new HashMap<>();
-        resultMap.put("rows",resultList);
-        resultMap.put("total",resultList.size());
-        resultMap.put("pageNum",0);
-        resultMap.put("pageSize",0);
+
+        long currentPage = 1;
+        long pageSize = 10;
+        String nameLike = "";
+
+        if (data.containsKey("currentPage")) {
+            currentPage = Long.valueOf(data.get("currentPage") + "");
+        }
+
+        if (data.containsKey("pageSize")) {
+            pageSize = Long.valueOf(data.get("pageSize") + "");
+        }
+
+        if (data.containsKey("name_like")) {
+            nameLike = (String) data.get("name_like");
+        }
+
+        Page<Event> eventPage = new Page<>(currentPage, pageSize);
+        //构建条件
+        QueryWrapper<Event> eduTeacherQueryWrapper = new QueryWrapper();
+
+        if (!StringUtils.isEmpty(nameLike)) {
+            eduTeacherQueryWrapper.like("name", nameLike);
+        }
+
+        eventService.page(eventPage, eduTeacherQueryWrapper);
+
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put("rows", eventPage.getRecords());
+        resultMap.put("total", String.valueOf(eventPage.getTotal()));
+        resultMap.put("pageNum", String.valueOf(eventPage.getCurrent()));
+        resultMap.put("pageSize",String.valueOf(eventPage.getSize()));
         return ReponseCode.ok().data(resultMap);
     }
 
@@ -82,9 +106,9 @@ public class EventController {
     }
 
     //查询(列表数据)
-    @GetMapping("search/{current}/{limit}")
-    public ReponseCode doSearch(@PathVariable long current,
-                                @PathVariable long limit) {
+    @PostMapping("search")
+    public ReponseCode doSearch(@RequestBody long current,
+                                @RequestBody long limit) {
 
         Page<Event> eventPage = new Page<>(current, limit);
         eventService.page(eventPage, null);
@@ -153,5 +177,14 @@ public class EventController {
         }
 
     }
+
+
+    //导入
+    @PostMapping("import")
+    public ReponseCode doImport(MultipartFile file) {
+        eventService.doBatchImport(file, eventService);
+        return ReponseCode.ok();
+    }
+
 }
 
