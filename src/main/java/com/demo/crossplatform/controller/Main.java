@@ -11,4 +11,14 @@ public class Main {
     public Object mainPage() {
         return new ModelAndView("main/mainPage");
     }
+
+    @RequestMapping("toEventUp")
+    public Object toEcentUpload() {
+        return new ModelAndView("main/eventUp");
+    }
+
+    @RequestMapping("toBlogNewsUp")
+    public Object toBlogNewsUpload() {
+        return new ModelAndView("main/blogNewsUp");
+    }
 }

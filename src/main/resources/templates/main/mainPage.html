@@ -1,138 +1,142 @@
 <#include "../layout.html">
 <@layout>
-	<style type="text/css">
-		.el-header .user-info{
-			height:80px;
-			line-height:80px;
-		}
-		.el-main{
-			padding:0px;
-		}
-		.el-tabs__content{
-			position:absolute;
-			top:38px;
-			left:0px;
-			right:0px;
-			bottom:0px;
-		}
-		.el-tabs{
-			position: relative;
-		}
-	</style>
-	<div id="app" class="mainPage" style="height:100%;width:100%">
-		<el-container>
-			<el-header height="80px">
-				<el-row>
-					<el-col :span="17">&nbsp;</el-col>
-					<el-col :span="7">
+<style type="text/css">
+    .el-header .user-info {
+        height: 80px;
+        line-height: 80px;
+    }
+
+    .el-main {
+        padding: 0px;
+    }
+
+    .el-tabs__content {
+        position: absolute;
+        top: 38px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+    }
+
+    .el-tabs {
+        position: relative;
+    }
+</style>
+<div id="app" class="mainPage" style="height:100%;width:100%">
+    <el-container>
+        <el-header height="80px">
+            <el-row>
+                <el-col :span="17">&nbsp;</el-col>
+                <el-col :span="7">
 						<span class="user-info">
 							欢迎您！{{user.username}}
 						</span>
-					</el-col>
-				</el-row>
-			</el-header>
-			<el-main>
-				<el-container>
-					<el-aside width="230">
-						<el-menu unique-opened size="mini">
-							<el-submenu v-for="(item,index) in menu" v-if="item.children&&item.children.length>0"
-								:index="item.id+''">
-								<template slot="title">{{item.name}}</template>
-								<el-menu-item v-for="(item1,index1) in item.children" :index="item1.id+''">
-									<a href="javascript:void(0)" @click="openTab" :name="item1.name"
-										:url="item1.url">{{item1.name}}</a></el-menu-item>
-							</el-submenu>
-						</el-menu>
-					</el-aside>
-					<el-main style="padding:2px;box-sizing: border-box;overflow:hidden">
-						<el-tabs type="border-card" style="width:100%;height:100%;overflow:hidden;margin:0px;padding:0px;" v-model="currentTab" @tab-remove="removeTab">
-							<el-tab-pane name='firstTab' label='首页'>
-							</el-tab-pane>
-							<el-tab-pane v-for="(item,idx) in tabs" closable :name="item.title" :label="item.title"
-								v-html="item.content"></el-tab-pane>
-						</el-tabs>
-					</el-main>
-				</el-container>
-			</el-main>
-			<el-footer height="30" style="line-height:30px;text-align:center">Copyright ©2021 </el-footer>
-		</el-container>
-	</div>
-	<script type="text/javascript">
-		var v = new Vue({
-			el: "#app",
-			data: function () {
-				return {
-					user: {
-						username:"测试用户"
-					},
-					menu: [{
-								id:"1",
-								name:"数据管理",
-								children:[{
-									id:"1",
-									name:"导入数据",
-									url:"user/toPage"
-								}]
-							},{
-								id:"3",
-								name:"事件管理",
-								children:[{
-									id:"4",
-									name:"事件管理",
-									url:"event/toPage"
-								},{
-									id:"5",
-									name:"导入事件",
-									url:"interfaceGroup/toPage"
-								}]
-							}],
-					tabs: [],
-					currentTab: "firstTab"
-				};
-			},
-			methods: {
-				openTab: function (e, tt, url) {
-					var ele = e ? $(e.target) : null;
-					var title = tt || ele.attr("name");
-					var flag = false;
-					for (var ele1 in this.tabs) {
-						if (this.tabs[ele1].title == title) {
-							flag = true;
-							break;
-						}
-					}
-					if (!flag) {
-						this.tabs.push({
-							title: title,
-							content: '<iframe style="display: block;border:0;width:100%;height:100%;overflow:hidden" src="../' + (url || ele.attr("url")) + '"></iframe>'
-						});
-					}
-					this.currentTab = title;
-				},
-				removeTab: function (idx) {
-					var idx1;
-					for (var i = 0; i < this.tabs.length; i++) {
-						if (this.tabs[i].title == idx) {
-							this.tabs.splice(i, 1);
-							idx1 = i;
-							break;
-						}
-					}
-					if (!this.tabs[idx1]) {
-						idx1--;
-					}
-					if (idx1 >= 0) {
-						this.currentTab = this.tabs[idx1].title;
-					} else {
-						this.currentTab = "firstTab";
-					}
-				}
-			}
-		});
-		(function () {
-			if (self != top) {
-				top.location.reload();
-			}
-		})()
-	</script>
+                </el-col>
+            </el-row>
+        </el-header>
+        <el-main>
+            <el-container>
+                <el-aside width="230">
+                    <el-menu unique-opened size="mini">
+                        <el-submenu v-for="(item,index) in menu" v-if="item.children&&item.children.length>0"
+                                    :index="item.id+''">
+                            <template slot="title">{{item.name}}</template>
+                            <el-menu-item v-for="(item1,index1) in item.children" :index="item1.id+''">
+                                <a href="javascript:void(0)" @click="openTab" :name="item1.name"
+                                   :url="item1.url">{{item1.name}}</a></el-menu-item>
+                        </el-submenu>
+                    </el-menu>
+                </el-aside>
+                <el-main style="padding:2px;box-sizing: border-box;overflow:hidden">
+                    <el-tabs type="border-card" style="width:100%;height:100%;overflow:hidden;margin:0px;padding:0px;"
+                             v-model="currentTab" @tab-remove="removeTab">
+                        <el-tab-pane name='firstTab' label='首页'>
+                        </el-tab-pane>
+                        <el-tab-pane v-for="(item,idx) in tabs" closable :name="item.title" :label="item.title"
+                                     v-html="item.content"></el-tab-pane>
+                    </el-tabs>
+                </el-main>
+            </el-container>
+        </el-main>
+        <el-footer height="30" style="line-height:30px;text-align:center">Copyright ©2021</el-footer>
+    </el-container>
+</div>
+<script type="text/javascript">
+    var v = new Vue({
+        el: "#app",
+        data: function () {
+            return {
+                user: {
+                    username: "测试用户"
+                },
+                menu: [{
+                    id: "1",
+                    name: "事件管理",
+                    children: [{
+                        id: "2",
+                        name: "事件管理",
+                        url: "event/toPage"
+                    }]
+                }, {
+                    id: "3",
+                    name: "数据管理",
+                    children: [{
+                        id: "4",
+                        name: "导入数据",
+                        url: "main/toEventUp"
+                    },{
+						id: "5",
+						name: "导入博文",
+						url: "main/toBlogNewsUp"
+					}]
+                }],
+                tabs: [],
+                currentTab: "firstTab"
+            };
+        },
+        methods: {
+            openTab: function (e, tt, url) {
+                var ele = e ? $(e.target) : null;
+                var title = tt || ele.attr("name");
+                var flag = false;
+                for (var ele1 in this.tabs) {
+                    if (this.tabs[ele1].title == title) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag) {
+                    this.tabs.push({
+                        title: title,
+                        content: '<iframe style="display: block;border:0;width:100%;height:100%;overflow:hidden" src="../' + (url || ele.attr("url")) + '"></iframe>'
+                    });
+                }
+                this.currentTab = title;
+            },
+            removeTab: function (idx) {
+                var idx1;
+                for (var i = 0; i < this.tabs.length; i++) {
+                    if (this.tabs[i].title == idx) {
+                        this.tabs.splice(i, 1);
+                        idx1 = i;
+                        break;
+                    }
+                }
+                if (!this.tabs[idx1]) {
+                    idx1--;
+                }
+                if (idx1 >= 0) {
+                    this.currentTab = this.tabs[idx1].title;
+                } else {
+                    this.currentTab = "firstTab";
+                }
+            }
+        }
+    });
+    (function () {
+        if (self != top) {
+            top.location.reload();
+        }
+    })()
+</script>
 </@layout>
