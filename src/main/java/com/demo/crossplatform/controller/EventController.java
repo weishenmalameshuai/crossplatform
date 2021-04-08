@@ -341,11 +341,14 @@ public class EventController {
             userQueryWrapper.eq("id", userId);
             User user = userService.getOne(userQueryWrapper);
 
+            String createTime = blogNews.getCreateTime() == null ?
+                    "" : new SimpleDateFormat("yyyy-MM-dd").format(blogNews.getCreateTime());
+
             EventExcel eventExcel = new EventExcel();
             eventExcel.setSource_app_name(sourceApp.getName());
             eventExcel.setUser_name(user.getUserName());
             eventExcel.setContent(blogNews.getContent());
-            eventExcel.setLssue_date(new SimpleDateFormat("yyyy-MM-dd").format(blogNews.getCreateTime()));
+            eventExcel.setLssue_date(createTime);
             eventExcel.setEventName(event.getName());
             eventExcels.add(eventExcel);
         }

@@ -53,8 +53,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="用户头像" prop="photo_loc">
-                            <img v-if="user.photo_loc" :src="getImg(user.photo_loc)" class="avatar">
-                            <img v-else src="/img/1.jpg" class="avatar">
+                            <img :src="user.photo_loc" class="avatar">
                         </el-form-item>
                     </el-col>
                 </el-row>
