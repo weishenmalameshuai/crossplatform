@@ -95,10 +95,10 @@
 				fileLength: 0,
 				uploadLogo: 0,
 				buttonS: false,
-				action:'../blogNews/uploadFile',
+				action:'../event/uploadFile',
 				files: [],
 				cols: [{
-					key: "even_name",
+					key: "eventName",
 					value: "事件名称"
 				},{
 					key: "source_app_name",
@@ -119,13 +119,6 @@
 			}
 		},
 		methods: {
-			//点击按钮上传文件到接口里面
-			submitUpload() {
-				this.importBtnDisabled = true;
-				this.loading = true;
-				// js: document.getElementById("upload").submit()
-				this.$refs.upload.submit()
-			},
 			//上传成功
 			fileUploadSuccess(response) {
 				//提示信息
@@ -155,7 +148,7 @@
 				that.buttonS = true;
 				$.ajax({
 					type: "post",
-					url: "../blogNews/uploadFile",
+					url: "../event/uploadFile",
 					data: that.fileData,
 					contentType: false,
 					processData: false,
@@ -204,7 +197,7 @@
 				return true;
 			},
 			addData: function () {
-				var result=getJson("batchAddBlogNews",{rows:this.rows,event_id:this.event_id});
+				var result=getJson("../event/batchAddEvents",{rows:this.rows});
 				if(result){
 					this.rows = []
 					ss()

@@ -108,6 +108,7 @@ public class BlogNewsController {
 
             userQueryWrapper = new QueryWrapper();
             userQueryWrapper.eq("user_name ", excel.getUser_name());
+            userQueryWrapper.eq("src_app_id ", sourceApp.getId());
             User user = userService.getOne(userQueryWrapper);
 
             if (user == null) {

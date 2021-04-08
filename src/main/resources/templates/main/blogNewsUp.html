@@ -208,7 +208,7 @@
                 return true;
             },
             addData: function () {
-                var result=getJson("batchAddBlogNews",{rows:this.rows,event_id:this.event_id});
+                var result=getJson("../blogNews/batchAddBlogNews",{rows:this.rows,event_id:this.event_id});
                 if(result){
                     this.rows = []
                     ss()

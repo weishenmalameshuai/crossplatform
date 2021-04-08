@@ -250,7 +250,18 @@ public class EventController {
     public Object batchAddBlogNews(@RequestBody Map<String, Object> data,
                                    HttpSession session) throws ParseException {
 
-        List<EventExcel> eventExcels = (List<EventExcel>) data.get("rows");
+        List<Map<String,Object>> datalist= (List<Map<String, Object>>) data.get("rows");
+        List<EventExcel> eventExcels = new ArrayList<>();
+        for (Map<String,Object> item:datalist){
+            EventExcel eventExcel=new EventExcel();
+            eventExcel.setEventName(item.get("eventName")+"");
+            eventExcel.setUser_name(item.get("user_name")+"");
+            eventExcel.setSource_app_name(item.get("source_app_name")+"");
+            eventExcel.setLssue_date(item.get("lssue_date")+"");
+            eventExcel.setContent(item.get("content")+"");
+            eventExcels.add(eventExcel);
+        }
+
 
         //构建条件
         QueryWrapper<Event> eventQueryWrapper;
@@ -282,7 +293,8 @@ public class EventController {
             }
 
             userQueryWrapper = new QueryWrapper();
-            userQueryWrapper.eq("userName", eventExcel.getUser_name());
+            userQueryWrapper.eq("user_name", eventExcel.getUser_name());
+            userQueryWrapper.eq("src_app_id", sourceApp.getId());
             User user = userService.getOne(userQueryWrapper);
 
             if (user == null) {
@@ -295,10 +307,14 @@ public class EventController {
             BlogNews blogNews = new BlogNews();
             blogNews.setSrcAppId(sourceApp.getId());
             blogNews.setUserId(user.getId());
-            blogNews.setEventId((Integer) session.getAttribute("event_id"));
+            blogNews.setEventId(event.getId());
             blogNews.setContent(eventExcel.getContent());
-            blogNews.setCreateTime(new SimpleDateFormat("yyyy-MM-dd")
-                    .parse(eventExcel.getLssue_date()));
+            try {
+                blogNews.setCreateTime(new SimpleDateFormat("yyyy-MM-dd")
+                        .parse(eventExcel.getLssue_date()));
+            }catch (Exception e){
+                blogNews.setCreateTime(null);
+            }
 
             blogNewsService.save(blogNews);
         }
@@ -341,14 +357,15 @@ public class EventController {
             userQueryWrapper.eq("id", userId);
             User user = userService.getOne(userQueryWrapper);
 
-            String createTime = blogNews.getCreateTime() == null ?
-                    "" : new SimpleDateFormat("yyyy-MM-dd").format(blogNews.getCreateTime());
-
             EventExcel eventExcel = new EventExcel();
             eventExcel.setSource_app_name(sourceApp.getName());
             eventExcel.setUser_name(user.getUserName());
             eventExcel.setContent(blogNews.getContent());
-            eventExcel.setLssue_date(createTime);
+            try{
+                eventExcel.setLssue_date(new SimpleDateFormat("yyyy-MM-dd").format(blogNews.getCreateTime()));
+            }catch (Exception e){
+                eventExcel.setLssue_date("");
+            }
             eventExcel.setEventName(event.getName());
             eventExcels.add(eventExcel);
         }
@@ -357,7 +374,7 @@ public class EventController {
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode(event.getName(), "UTF-8").replaceAll("\\+", "%20");
-        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        response.setHeader("Content-disposition", "attachment;filename*=" + fileName + ".xlsx");
         EasyExcel.write(response.getOutputStream(), EventExcel.class).sheet("Sheet1").doWrite(eventExcels);
 
     }
