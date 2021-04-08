@@ -308,10 +308,10 @@ public class EventController {
 
 
     @RequestMapping("/download")
-    public void download(@RequestBody Map<String, Object> data,
+    public void download(@RequestParam(defaultValue = "",name = "event_id")String event_id,
                          HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        int eventId = Integer.parseInt(data.get("event_id")+"");
+        int eventId = Integer.parseInt(event_id);
         QueryWrapper<Event> eventQueryWrapper =  new QueryWrapper();
         eventQueryWrapper.eq("id", eventId);
         Event event = eventService.getOne(eventQueryWrapper);
@@ -345,7 +345,7 @@ public class EventController {
             eventExcel.setSource_app_name(sourceApp.getName());
             eventExcel.setUser_name(user.getUserName());
             eventExcel.setContent(blogNews.getContent());
-            eventExcel.setLssue_date(blogNews.getCreateTime()+"");
+            eventExcel.setLssue_date(new SimpleDateFormat("yyyy-MM-dd").format(blogNews.getCreateTime()));
             eventExcel.setEventName(event.getName());
             eventExcels.add(eventExcel);
         }
@@ -353,7 +353,6 @@ public class EventController {
 
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");
-        // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
         String fileName = URLEncoder.encode(event.getName(), "UTF-8").replaceAll("\\+", "%20");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
         EasyExcel.write(response.getOutputStream(), EventExcel.class).sheet("Sheet1").doWrite(eventExcels);
