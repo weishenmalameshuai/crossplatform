@@ -82,7 +82,7 @@
                                 <el-row>
                                     <el-col :span="24">
                                         <el-form-item label="主账号" prop="user_id">
-                                            <el-select size="mini" v-model="dataInfo.user_id" @change="selectChange">
+                                            <el-select size="mini" v-model="dataInfo.user_id">
                                                 <el-option v-for="item in userList" :label="item.value" :key="item.key"
                                                            :value="item.key"></el-option>
                                             </el-select>
@@ -166,7 +166,7 @@
         el: "#app",
         data: function () {
             return {
-                appList:[],
+                appList:baseData.salist||[],
                 dataInfo: baseData.dataInfo || {},
                 eventList: baseData.eventList || [],
                 sourceAppList: baseData.sourceAppList || [],
@@ -189,7 +189,7 @@
             selectInApp: function (val) {
                 var result = getJson("../user/getUserListByApp", {id: val});
                 if (result && result.userlist) {
-                    v.dataInfo.user_id=''
+                    delete v.dataInfo.user_id
                     v.userList=result.userlist
                 }
             },
@@ -215,14 +215,10 @@
                 if (val) {
                     var result = getJson("getAppListByEven", {event_id: val});
                     if (result) {
+                        delete v.dataInfo.sourceApps
                         v.appList=result.appList
                     }
                 }
-            },
-            selectChange: function (val) {
-                setTimeout(function () {
-                    dataInfo.user_id = val;
-                },500)
             }
         }
     });

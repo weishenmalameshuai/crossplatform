@@ -80,6 +80,7 @@ public class UserController {
 
     @RequestMapping("getUAbaseData")
     public Object getUAbaseData(HttpSession session) {
+        Object event_id=session.getAttribute("UA_even_id");
         Map<String, Object> resultMap = new HashMap<>();
 
         List<Event> events = eventService.list(null);
@@ -89,6 +90,22 @@ public class UserController {
         }
         resultMap.put("eventList", eventList);
 
+        if(event_id!=null&&!"".equals(event_id)) {
+            List<Map<String, Object>> salist = new ArrayList<>();//通过事件查平台列表
+            QueryWrapper<BlogNews> blogNewsQueryWrapper = new QueryWrapper();
+            blogNewsQueryWrapper.eq("event_id", event_id);
+            Set<String> appIds = new HashSet<>();
+            List<BlogNews> BlogNewsLists = blogNewsService.list(blogNewsQueryWrapper);
+            for (BlogNews blogNews : BlogNewsLists) {
+                if (!appIds.contains(blogNews.getSrcAppId() + "")) {
+                    appIds.add(blogNews.getSrcAppId() + "");
+                    SourceApp item = sourceAppService.getById(blogNews.getSrcAppId());
+                    salist.add(JSONObject.parseObject("{value:\"" + item.getName() + "\",key:\"" + item.getId() + "\"}"));
+                }
+            }
+            resultMap.put("salist", salist);
+        }
+
         List<SourceApp> sourceApps = sourceAppService.list(null);
         List<Map<String, Object>> sourceAppList = new ArrayList<>();
         for (SourceApp sourceApp : sourceApps) {
@@ -97,7 +114,7 @@ public class UserController {
         resultMap.put("sourceAppList", sourceAppList);
 
         Map<String, Object> dataInfo = new HashMap<>();
-        dataInfo.put("event_id", session.getAttribute("UA_even_id"));
+        dataInfo.put("event_id", event_id+"");
 
         resultMap.put("dataInfo", dataInfo);
 
