@@ -1,37 +1,32 @@
 package com.demo.crossplatform.controller;
 
 
-import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.alibaba.fastjson.JSONObject;
 import com.demo.crossplatform.commonutils.ReponseCode;
 import com.demo.crossplatform.entity.BlogNews;
 import com.demo.crossplatform.entity.Event;
 import com.demo.crossplatform.entity.SourceApp;
 import com.demo.crossplatform.entity.User;
-import com.demo.crossplatform.entity.excel.BlogNewsExcel;
 import com.demo.crossplatform.entity.excel.EventExcel;
 import com.demo.crossplatform.service.BlogNewsService;
 import com.demo.crossplatform.service.EventService;
 import com.demo.crossplatform.service.SourceAppService;
 import com.demo.crossplatform.service.UserService;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
-import java.text.DateFormat;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.xml.transform.Source;
 
 /**
  * <p>
@@ -317,10 +312,9 @@ public class EventController {
                          HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         int eventId = Integer.parseInt(data.get("event_id")+"");
-        QueryWrapper<Event> eventQueryWrapper = new QueryWrapper();
+        QueryWrapper<Event> eventQueryWrapper =  new QueryWrapper();
         eventQueryWrapper.eq("id", eventId);
         Event event = eventService.getOne(eventQueryWrapper);
-
 
 
         QueryWrapper<BlogNews> blogNewsQueryWrapper = new QueryWrapper();
@@ -356,17 +350,13 @@ public class EventController {
             eventExcels.add(eventExcel);
         }
 
-        try {
 
-
-            String name = event.getName() + ".xls";
-            String fileName = new String(name.getBytes(), "ISO-8859-1");
-            response.addHeader("Content-Disposition", "filename=" + fileName);
-            ServletOutputStream out = response.getOutputStream();
-            EasyExcelFactory.write(out, BlogNewsExcel.class).sheet("Sheet1").doWrite(eventExcels);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+        String fileName = URLEncoder.encode(event.getName(), "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), EventExcel.class).sheet("Sheet1").doWrite(eventExcels);
 
     }
 
