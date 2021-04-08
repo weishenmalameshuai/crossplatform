@@ -59,6 +59,11 @@ public class EventController {
         return new ModelAndView("event/eventPage");
     }
 
+    @RequestMapping("toEventUpload")
+    public Object toEventUpload(){
+        return new ModelAndView("event/eventUpload");
+    }
+
     @RequestMapping("toUserDetail")
     public Object toUserDetail(@RequestParam(defaultValue = "", name = "id") String id,
                            HttpSession session){
@@ -311,7 +316,7 @@ public class EventController {
     public void download(@RequestBody Map<String, Object> data,
                          HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        int eventId = (int) data.get("event_id");
+        int eventId = Integer.parseInt(data.get("event_id")+"");
         QueryWrapper<Event> eventQueryWrapper = new QueryWrapper();
         eventQueryWrapper.eq("id", eventId);
         Event event = eventService.getOne(eventQueryWrapper);
@@ -346,7 +351,7 @@ public class EventController {
             eventExcel.setSource_app_name(sourceApp.getName());
             eventExcel.setUser_name(user.getUserName());
             eventExcel.setContent(blogNews.getContent());
-            eventExcel.setLssue_date(blogNews.getCreateTime().toString());
+            eventExcel.setLssue_date(blogNews.getCreateTime()+"");
             eventExcel.setEventName(event.getName());
             eventExcels.add(eventExcel);
         }

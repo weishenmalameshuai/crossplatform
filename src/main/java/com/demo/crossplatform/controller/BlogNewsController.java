@@ -68,7 +68,7 @@ public class BlogNewsController {
     }
 
     @RequestMapping("batchAddBlogNews")
-    public Object batchAddBlogNews(@RequestBody Map<String, Object> data) throws ParseException {
+    public Object batchAddBlogNews(@RequestBody Map<String, Object> data) {
         List<Map<String,Object>> datalist= (List<Map<String, Object>>) data.get("rows");
         Object event_id=data.get("event_id");
         List<BlogNewsExcel> blogNewsExcels = new ArrayList<>();

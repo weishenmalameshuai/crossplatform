@@ -51,8 +51,8 @@ public class UserController {
     }
 
     @RequestMapping("toUserAssociation")
-    public Object toUserAssociation(@RequestParam(defaultValue = "", name = "even_id") String even_id, HttpSession session) {
-        session.setAttribute("UA_even_id", even_id);
+    public Object toUserAssociation(@RequestParam(defaultValue = "", name = "event_id") String event_id, HttpSession session) {
+        session.setAttribute("UA_even_id", event_id);
         return new ModelAndView("user/userAssociation");
     }
 
