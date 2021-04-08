@@ -53,15 +53,8 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="用户头像" prop="photo_loc">
-                            <el-upload
-                                    class="avatar-uploader"
-                                    action=""
-                                    :show-file-list="false"
-                                    :on-change="handleFileUploaderChange"
-                                    :before-upload="beforeAvatarUpload">
-                                <img v-if="user.photo_loc" :src="user.photo_loc" class="avatar">
-                                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-                            </el-upload>
+                            <img v-if="user.photo_loc" :src="getImg(user.photo_loc)" class="avatar">
+                            <img v-else src="/img/1.jpg" class="avatar">
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -87,7 +80,6 @@
                 rules: {
                     user_name: _sv("r"),
                     description: _sv("r"),
-                    photo_loc: _sv("r"),
                 },
                 cols: [{
                     key: "create_time",
@@ -100,6 +92,9 @@
             }
         },
         methods: {
+            getImg:function(imgName){
+                return '../../static/img'+imgName
+            },
             handleFileUploaderChange(file) {
                 const self = this
                 let reader = new FileReader()
@@ -117,9 +112,6 @@
                 return isJPG;
             },
             saveData: function () {
-                if (v.user.photo_loc==''){
-                    sw("请上传用户头像！")
-                }
                 v.$refs.userform.validate().then(function () {
                     var result = getJson("../user/update", v.user);
                     if (result) {

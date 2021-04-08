@@ -1,10 +1,12 @@
 package com.demo.crossplatform.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.demo.crossplatform.commonutils.ReponseCode;
 import com.demo.crossplatform.entity.BlogNews;
+import com.demo.crossplatform.entity.Event;
 import com.demo.crossplatform.entity.SourceApp;
 import com.demo.crossplatform.entity.User;
 import com.demo.crossplatform.entity.excel.BlogNewsExcel;
@@ -56,6 +58,12 @@ public class BlogNewsController {
     public Object getBaseData(HttpSession session){
         Map<String,Object> result=new HashMap<>();
         result.put("event_id",session.getAttribute("blogUpload_event_id"));
+        List<Event> events = eventService.list(null);
+        List<Map<String, Object>> eventList = new ArrayList<>();
+        for (Event event : events) {
+            eventList.add(JSONObject.parseObject("{value:\"" + event.getName() + "\",key:\"" + event.getId() + "\"}"));
+        }
+        result.put("eventList", eventList);
         return ReponseCode.ok().data(result);
     }
 

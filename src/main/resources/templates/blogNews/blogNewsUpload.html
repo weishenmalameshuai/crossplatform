@@ -56,6 +56,14 @@
                                     </el-upload>
                                 </el-form-item>
                             </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="事件">
+                                    <el-select filterable size="mini" v-model="event_id">
+                                        <el-option v-for="item in eventList" :label="item.value" :key="item.key"
+                                                   :value="item.key"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
                         </el-row>
                     </el-form>
                 </el-card>
@@ -113,12 +121,17 @@
                 }],
                 rows: [],
                 importBtnDisabled: false, // 按钮是否禁用,
-                loading: false
+                loading: false,
+                eventList:baseData.eventList||[]
             }
         },
         methods: {
             //点击按钮上传文件到接口里面
             submitUpload() {
+                if (this.event_id==''){
+                    sw("请选择事件")
+                    return;
+                }
                 this.importBtnDisabled = true;
                 this.loading = true;
                 // js: document.getElementById("upload").submit()
