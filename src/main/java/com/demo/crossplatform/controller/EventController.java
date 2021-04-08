@@ -214,8 +214,8 @@ public class EventController {
     }
 
     //删除方法
-    @DeleteMapping("delete/{id}")
-    public ReponseCode doDelete(@PathVariable int id) {
+    @PostMapping("delete/{id}")
+    public ReponseCode doDelete(@PathVariable("id") int id) {
 
         if (eventService.removeById(id)) {
             return ReponseCode.ok();

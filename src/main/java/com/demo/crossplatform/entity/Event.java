@@ -1,11 +1,9 @@
 package com.demo.crossplatform.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.util.Date;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -38,10 +36,18 @@ public class Event implements Serializable {
     private String name;
 
     /**
+     * 删除
+     */
+    @TableLogic
+    @TableField(fill = FieldFill.INSERT)
+    private Integer isDelete;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;
+
 
 
 }

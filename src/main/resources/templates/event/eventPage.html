@@ -40,6 +40,18 @@
 								}
                             }
                         }, {
+                            value: "删除",
+                            handler: function () {
+                                var cur=v.$refs.qfdt.getCurrent();
+                                if(cur){
+                                    getJson("delete/"+cur.id);
+                                    ss("删除成功");
+                                }else{
+                                    sm();
+                                }
+                            }
+                        },
+                            {
                             value: "查看事件",
                             handler: function () {
                                 var cur = v.$refs.qfdt.getCurrent();
