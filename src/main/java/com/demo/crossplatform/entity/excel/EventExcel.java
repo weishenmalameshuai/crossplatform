@@ -20,4 +20,5 @@ public class EventExcel {
 
     @ExcelProperty(value="博文内容", index = 4)
     private String content;
+
 }
