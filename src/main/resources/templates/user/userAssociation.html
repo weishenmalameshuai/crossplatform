@@ -63,11 +63,12 @@
                                 <span style="border-radius:50%;background-color:#f72a6b;height:20px;width:20px;display:inline-block; color:white;text-align:center">2</span><span
                                     style="padding:10px;">关联用户信息</span>
                                 <el-button size="mini" @click="startAss" type="success">开始关联</el-button>
-                                <el-button size="mini" type="success">导出数据</el-button>
+<!--                                <el-button size="mini" type="success">导出数据</el-button>-->
                             </div>
                         </div>
                         <el-container style="overflow:hidden">
-                            <el-aside width="530" style="padding:5px 0px;box-sizing: border-box;overflow:hidden;margin-right: 110px;">
+                            <el-aside width="530"
+                                      style="padding:5px 0px;box-sizing: border-box;overflow:hidden;margin-right: 110px;">
                                 <el-row>
                                     <el-col :span="24">
                                         <el-form-item label="主账号平台" prop="user_inApp">
@@ -92,8 +93,8 @@
                                 <el-row>
                                     <el-col :span="24">
                                         <el-form-item label="匹配进程">
-                                        <el-progress :text-inside="true" :stroke-width="26"
-                                                     :percentage="percentage"></el-progress>
+                                            <el-progress :text-inside="true" :stroke-width="26"
+                                                         :percentage="percentage"></el-progress>
                                         </el-form-item>
                                     </el-col>
                                 </el-row>
@@ -130,8 +131,7 @@
         {headerName: '匹配度', field: 'likes'},
     ];
 
-    var data = [
-    ];
+    var data = [];
 
     //将列和数据赋给gridOptions
     var gridOptions = {
@@ -166,7 +166,7 @@
         el: "#app",
         data: function () {
             return {
-                appList:baseData.salist||[],
+                appList: baseData.salist || [],
                 dataInfo: baseData.dataInfo || {},
                 eventList: baseData.eventList || [],
                 sourceAppList: baseData.sourceAppList || [],
@@ -175,22 +175,22 @@
             }
         },
         methods: {
-            toMatching:function(){
-                if (v.dataInfo.event_id==''){
+            toMatching: function () {
+                if (typeof v.dataInfo.event_id == 'undefined' || v.dataInfo.event_id == '') {
                     sw("请选择事件")
                     return;
                 }
-                if (v.dataInfo.user_id==''){
+                if (typeof v.dataInfo.user_id == 'undefined' || v.dataInfo.user_id == '') {
                     sw("请选择主账号")
                     return;
                 }
-                location.href="../user/toUserMatching?event_id="+v.dataInfo.event_id+"&user_id="+v.dataInfo.user_id;
+                location.href = "../user/toUserMatching?event_id=" + v.dataInfo.event_id + "&user_id=" + v.dataInfo.user_id;
             },
             selectInApp: function (val) {
                 var result = getJson("../user/getUserListByApp", {id: val});
                 if (result && result.userlist) {
                     delete v.dataInfo.user_id
-                    v.userList=result.userlist
+                    v.userList = result.userlist
                 }
             },
             startAss: function () {
@@ -209,14 +209,14 @@
                             clearInterval(int)
                         }
                     }, 50)
-                },500)
+                }, 500)
             },
             selectEven: function (val) {
                 if (val) {
                     var result = getJson("getAppListByEven", {event_id: val});
                     if (result) {
                         delete v.dataInfo.sourceApps
-                        v.appList=result.appList
+                        v.appList = result.appList
                     }
                 }
             }

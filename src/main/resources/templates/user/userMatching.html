@@ -51,14 +51,14 @@
                                 <span style="border-radius:50%;background-color:#f72a6b;height:20px;width:20px;display:inline-block; color:white;text-align:center">2</span><span
                                     style="padding:10px;">匹配用户信息</span>
                                 <el-button size="mini" @click="startAss" type="success">开始匹配</el-button>
-                                <el-button size="mini" type="success">导出数据</el-button>
+<!--                                <el-button size="mini" type="success">导出数据</el-button>-->
                             </div>
                         </div>
                         <el-container style="overflow:hidden">
                             <el-aside width="530" style="padding:5px 0px;box-sizing: border-box;overflow:hidden;margin-right: 110px;">
                                 <el-row>
                                     <el-col :span="24">
-                                        <el-form-item label="主账号主账号" prop="user_name">
+                                        <el-form-item label="主账号" prop="user_name">
                                             <el-input size="mini" v-model="dataInfo.user_name" readonly="true"></el-input>
                                         </el-form-item>
                                     </el-col>
