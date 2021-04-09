@@ -28,14 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-/**
- * <p>
- *  前端控制器
- * </p>
- *
- * @author administrator
- * @since 2021-04-02
- */
 @RestController
 @RequestMapping("/crossplatform/event")
 public class EventController {
@@ -97,7 +89,6 @@ public class EventController {
         }
 
         Page<Event> eventPage = new Page<>(currentPage, pageSize);
-        //构建条件
         QueryWrapper<Event> eduTeacherQueryWrapper = new QueryWrapper();
 
         if (!StringUtils.isEmpty(nameLike)) {
@@ -119,7 +110,6 @@ public class EventController {
 
         String eventId = (String) session.getAttribute("event_id");
 
-        //构建条件
         QueryWrapper<BlogNews> blogNewsQueryWrapper = new QueryWrapper();
         blogNewsQueryWrapper.eq("event_id", eventId);
 
@@ -165,7 +155,6 @@ public class EventController {
         return ReponseCode.ok().data(result);
     }
 
-    //查询(列表数据)
     @PostMapping("search")
     public ReponseCode doSearch(@RequestBody long current,
                                 @RequestBody long limit) {
@@ -174,26 +163,16 @@ public class EventController {
         eventService.page(eventPage, null);
 
         Map<String, Object> pageMap = new HashMap();
-
-        //总记录数
         pageMap.put("total", eventPage.getTotal());
-        //每页显示记录数
         pageMap.put("size", eventPage.getSize());
-        //当前页
         pageMap.put("current", eventPage.getCurrent());
-        //总页数
         pageMap.put("pages", eventPage.getPages());
-        //是否有上一页
         pageMap.put("hasprevious", eventPage.hasPrevious());
-        //是否有下一页
         pageMap.put("hasnext", eventPage.hasNext());
-        //记录数
         pageMap.put("events", eventPage.getRecords());
-
         return ReponseCode.ok().data("events", pageMap);
     }
 
-    //查询(单条数据)
     @PostMapping("select/{id}")
     public ReponseCode doSelect(@PathVariable("id") int id) {
         System.err.println(id);
@@ -201,7 +180,6 @@ public class EventController {
         return ReponseCode.ok().data("event", event);
     }
 
-    //新增方法
     @PostMapping("insert")
     public ReponseCode doInsert(@RequestBody Event event) {
         if (eventService.save(event)) {
@@ -213,7 +191,6 @@ public class EventController {
 
     }
 
-    //删除方法
     @PostMapping("delete/{id}")
     public ReponseCode doDelete(@PathVariable("id") int id) {
 
@@ -225,7 +202,6 @@ public class EventController {
         }
     }
 
-    //更新方法
     @PostMapping("update")
     public ReponseCode doUpdate(@RequestBody Event event) {
 
@@ -261,18 +237,10 @@ public class EventController {
             eventExcel.setContent(item.get("content")+"");
             eventExcels.add(eventExcel);
         }
-
-
-        //构建条件
         QueryWrapper<Event> eventQueryWrapper;
-        //构建条件
         QueryWrapper<SourceApp> sourceAppQueryWrapper;
-        //构建条件
         QueryWrapper<User> userQueryWrapper;
-
         for (EventExcel eventExcel : eventExcels) {
-
-
             eventQueryWrapper = new QueryWrapper();
             eventQueryWrapper.eq("name", eventExcel.getEventName());
             Event event = eventService.getOne(eventQueryWrapper);
@@ -337,9 +305,7 @@ public class EventController {
         blogNewsQueryWrapper.eq("event_id", eventId);
         List<BlogNews> BlogNewsLists = blogNewsService.list(blogNewsQueryWrapper);
 
-        //构建条件
         QueryWrapper<SourceApp> sourceAppQueryWrapper;
-        //构建条件
         QueryWrapper<User> userQueryWrapper;
 
         List<EventExcel> eventExcels = new ArrayList();

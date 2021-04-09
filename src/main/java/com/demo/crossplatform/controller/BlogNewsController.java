@@ -20,21 +20,12 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * <p>
- *  前端控制器
- * </p>
- *
- * @author administrator
- * @since 2021-04-02
- */
 @RestController
 @RequestMapping("/crossplatform/blogNews")
 public class BlogNewsController {
@@ -88,36 +79,27 @@ public class BlogNewsController {
             blogNewsExcel.setContent(item.get("content")+"");
             blogNewsExcels.add(blogNewsExcel);
         }
-
-        //构建条件
         QueryWrapper<SourceApp> sourceAppQueryWrapper;
-        //构建条件
         QueryWrapper<User> userQueryWrapper;
-
         for (BlogNewsExcel excel : blogNewsExcels) {
-
             sourceAppQueryWrapper = new QueryWrapper();
             sourceAppQueryWrapper.eq("name", excel.getSource_app_name());
             SourceApp sourceApp = sourceAppService.getOne(sourceAppQueryWrapper);
-
             if (sourceApp == null) {
                 sourceApp = new SourceApp();
                 sourceApp.setName(excel.getSource_app_name());
                 sourceAppService.save(sourceApp);
             }
-
             userQueryWrapper = new QueryWrapper();
             userQueryWrapper.eq("user_name ", excel.getUser_name());
             userQueryWrapper.eq("src_app_id ", sourceApp.getId());
             User user = userService.getOne(userQueryWrapper);
-
             if (user == null) {
                 user = new User();
                 user.setUserName(excel.getUser_name());
                 user.setSrcAppId(sourceApp.getId());
                 userService.save(user);
             }
-
             BlogNews blogNews = new BlogNews();
             blogNews.setSrcAppId(sourceApp.getId());
             blogNews.setUserId(user.getId());
@@ -129,8 +111,6 @@ public class BlogNewsController {
             }catch (Exception e){
                 blogNews.setCreateTime(null);
             }
-
-
             blogNewsService.save(blogNews);
         }
 
@@ -139,11 +119,8 @@ public class BlogNewsController {
 
     @RequestMapping("batchDelBlogNews")
     public Object deleteBlogNews(@RequestBody Map<String, Object> data) {
-
         Object event_id = data.get("event_id");
         Object user_id = data.get("user_id");
-
-        //构建条件
         QueryWrapper<BlogNews> blogNewsQueryWrapper = new QueryWrapper();
         blogNewsQueryWrapper.eq("event_id", event_id);
         blogNewsQueryWrapper.eq("user_id", user_id);
@@ -155,34 +132,21 @@ public class BlogNewsController {
         }
     }
 
-    //查询(列表数据)
     @GetMapping("search/{current}/{limit}")
     public ReponseCode doSearch(@PathVariable long current,
                                 @PathVariable long limit) {
         Page<BlogNews> blogNewsPage = new Page<>(current, limit);
         blogNewsService.page(blogNewsPage, null);
-
         Map<String, Object> pageMap = new HashMap();
-
-        //总记录数
         pageMap.put("total", blogNewsPage.getTotal());
-        //每页显示记录数
         pageMap.put("size", blogNewsPage.getSize());
-        //当前页
         pageMap.put("current", blogNewsPage.getCurrent());
-        //总页数
         pageMap.put("pages", blogNewsPage.getPages());
-        //是否有上一页
-        pageMap.put("hasprevious", blogNewsPage.hasPrevious());
-        //是否有下一页
         pageMap.put("hasnext", blogNewsPage.hasNext());
-        //记录数
         pageMap.put("blogNews", blogNewsPage.getRecords());
-
         return ReponseCode.ok().data("blogNews", pageMap);
     }
 
-    //查询(单条数据)
     @GetMapping("select/{id}")
     public ReponseCode doSelect(@PathVariable("id") int id) {
 
@@ -190,7 +154,6 @@ public class BlogNewsController {
         return ReponseCode.ok().data("blogNews", blogNews);
     }
 
-    //新增方法
     @PostMapping("insert")
     public ReponseCode doInsert(@RequestBody BlogNews blogNews) {
 
@@ -203,7 +166,6 @@ public class BlogNewsController {
 
     }
 
-    //删除方法
     @DeleteMapping("delete/{id}")
     public ReponseCode doDelete(@PathVariable int id) {
 
@@ -215,7 +177,6 @@ public class BlogNewsController {
         }
     }
 
-    //更新方法
     @PostMapping("update")
     public ReponseCode doUpdate(@RequestBody BlogNews blogNews) {
 

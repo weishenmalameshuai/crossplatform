@@ -115,14 +115,12 @@
 					value: "博文内容"
 				}],
 				rows: [],
-				importBtnDisabled: false, // 按钮是否禁用,
+				importBtnDisabled: false,
 				loading: false
 			}
 		},
 		methods: {
-			//上传成功
 			fileUploadSuccess(response) {
-				//提示信息
 				this.loading = false
 				this.$message({
 					type: 'success',
@@ -130,7 +128,6 @@
 				})
 				this.rows = response.data.blogList;
 			},
-			//上传失败
 			fileUploadError() {
 				this.loading = false
 				this.$message({

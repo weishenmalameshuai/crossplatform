@@ -6,22 +6,15 @@ import lombok.Data;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author Administrator
- */
 @Data
 public class ReponseCode {
 
-    @ApiModelProperty(value = "是否成功")
     private boolean success;
 
-    @ApiModelProperty(value = "状态码")
     private int code;
 
-    @ApiModelProperty(value = "消息")
     private String message;
 
-    @ApiModelProperty(value = "数据")
     private Map<String, Object> data = new HashMap();
 
     private ReponseCode(){};

@@ -124,7 +124,6 @@
     </el-form>
 </div>
 <script type="text/javascript">
-    //定义表格列
     var columnDefs = [
         {headerName: '平台', field: 'sourceApp_name'},
         {headerName: '用户名', field: 'user_name'},
@@ -133,31 +132,28 @@
 
     var data = [];
 
-    //将列和数据赋给gridOptions
     var gridOptions = {
-        i18n: 'zh-cn', //中文
-        columnDefs: columnDefs,  //设置列名
-        rowData: data,  //设置数据
+        i18n: 'zh-cn',
+        columnDefs: columnDefs,
+        rowData: data,
         onGridReady: function () {
-            //表格创建完成后执行的事件
-            gridOptions.api.sizeColumnsToFit();//调整表格大小自适应
+            gridOptions.api.sizeColumnsToFit();
         },
         defaultColDef: {
-            editable: true,//单元表格是否可编辑
+            editable: true,
             enableRowGroup: true,
             enablePivot: true,
             enableValue: true,
-            sortable: true, //开启排序
-            resizable: true,//是否可以调整列大小，就是拖动改变列大小
-            filter: true  //开启刷选
+            sortable: true,
+            resizable: true,
+            filter: true
         },
-        pagination: false,  //开启分页（前端分页）
-        paginationAutoPageSize: true, //根据网页高度自动分页（前端分页）
+        pagination: false,
+        paginationAutoPageSize: true,
     };
 
-    //在dom加载完成后 初始化agGrid完成
     document.addEventListener("DOMContentLoaded", function () {
-        var eGridDiv = document.querySelector('#myGrid');  //myGrid 是容器div的ID
+        var eGridDiv = document.querySelector('#myGrid');
         new agGrid.Grid(eGridDiv, gridOptions);
     });
 

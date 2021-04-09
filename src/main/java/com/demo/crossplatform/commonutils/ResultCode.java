@@ -1,10 +1,5 @@
 package com.demo.crossplatform.commonutils;
 
-
-/**
- * @author Administrator
- */
-
 public enum ResultCode {
 
     //成功

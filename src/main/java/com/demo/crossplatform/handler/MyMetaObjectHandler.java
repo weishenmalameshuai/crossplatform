@@ -13,8 +13,6 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override
     public void insertFill(MetaObject metaObject) {
-
-        //属性名称，不是字段名称
         this.setFieldValByName("createTime", new Date(), metaObject);
         this.setFieldValByName("isDelete", 0, metaObject);
     }

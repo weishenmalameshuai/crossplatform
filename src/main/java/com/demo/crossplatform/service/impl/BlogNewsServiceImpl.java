@@ -15,14 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.util.List;
 
-/**
- * <p>
- *  服务实现类
- * </p>
- *
- * @author administrator
- * @since 2021-04-02
- */
 @Service
 public class BlogNewsServiceImpl extends ServiceImpl<BlogNewsMapper, BlogNews> implements BlogNewsService {
 

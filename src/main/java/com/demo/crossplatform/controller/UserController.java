@@ -20,14 +20,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.util.*;
 
-/**
- * <p>
- * 前端控制器
- * </p>
- *
- * @author administrator
- * @since 2021-04-02
- */
 @RestController
 @RequestMapping("/crossplatform/user")
 public class UserController {
@@ -91,7 +83,7 @@ public class UserController {
         resultMap.put("eventList", eventList);
 
         if(event_id!=null&&!"".equals(event_id)) {
-            List<Map<String, Object>> salist = new ArrayList<>();//通过事件查平台列表
+            List<Map<String, Object>> salist = new ArrayList<>();
             QueryWrapper<BlogNews> blogNewsQueryWrapper = new QueryWrapper();
             blogNewsQueryWrapper.eq("event_id", event_id);
             Set<String> appIds = new HashSet<>();
@@ -124,7 +116,7 @@ public class UserController {
     @RequestMapping("getAppListByEven")
     public Object getAppListByEven(@RequestBody Map<String, Object> data) {
         String event_id = data.get("event_id").toString();
-        List<Map<String, Object>> sourceAppList = new ArrayList<>();//通过事件查平台列表
+        List<Map<String, Object>> sourceAppList = new ArrayList<>();
         QueryWrapper<BlogNews> blogNewsQueryWrapper = new QueryWrapper();
         blogNewsQueryWrapper.eq("event_id", event_id);
         Set<String> appIds=new HashSet<>();
@@ -187,7 +179,6 @@ public class UserController {
         return ReponseCode.ok().data(resultMap);
     }
 
-    //查询(列表数据)
     @GetMapping("search/{current}/{limit}")
     public ReponseCode doSearch(@PathVariable long current,
                                 @PathVariable long limit) {
@@ -197,25 +188,17 @@ public class UserController {
 
         Map<String, Object> pageMap = new HashMap();
 
-        //总记录数
         pageMap.put("total", userPage.getTotal());
-        //每页显示记录数
         pageMap.put("size", userPage.getSize());
-        //当前页
         pageMap.put("current", userPage.getCurrent());
-        //总页数
         pageMap.put("pages", userPage.getPages());
-        //是否有上一页
         pageMap.put("hasprevious", userPage.hasPrevious());
-        //是否有下一页
         pageMap.put("hasnext", userPage.hasNext());
-        //记录数
         pageMap.put("users", userPage.getRecords());
 
         return ReponseCode.ok().data("users", pageMap);
     }
 
-    //查询(单条数据)
     @GetMapping("select/{id}")
     public ReponseCode doSelect(@PathVariable("id") int id) {
 
@@ -223,7 +206,6 @@ public class UserController {
         return ReponseCode.ok().data("user", user);
     }
 
-    //新增方法
     @PostMapping("insert")
     public ReponseCode doInsert(@RequestBody User user) {
 
@@ -235,7 +217,6 @@ public class UserController {
 
     }
 
-    //删除方法
     @DeleteMapping("delete/{id}")
     public ReponseCode doDelete(@PathVariable int id) {
 
@@ -246,7 +227,6 @@ public class UserController {
         }
     }
 
-    //更新方法
     @RequestMapping("update")
     public ReponseCode doUpdate(@RequestBody Map<String, Object> data) {
 

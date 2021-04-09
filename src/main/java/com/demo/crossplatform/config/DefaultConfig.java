@@ -11,17 +11,11 @@ import org.springframework.context.annotation.Configuration;
 @MapperScan("com.demo.crossplatform.mapper")
 public class DefaultConfig {
 
-    /**
-     * 逻辑删除插件
-     */
     @Bean
     public ISqlInjector sqlInjector() {
         return new LogicSqlInjector();
     }
 
-    /**
-     * 分页插件
-     */
     @Bean
     public PaginationInterceptor paginationInterceptor() {
         return new PaginationInterceptor();
